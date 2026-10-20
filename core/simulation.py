@@ -42,8 +42,7 @@ class Simulation:
             if step % self.sample_interval != 0:
                 continue
 
-            snapshot = rt.snapshot()
-            measurement = rt.model.measure(snapshot)
+            measurement = rt.measure()
 
             if not measurement:
                 raise ValueError("Model returned no measurements")

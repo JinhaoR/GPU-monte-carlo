@@ -23,11 +23,11 @@ class Model(ABC):
         pass
 
     @abstractmethod
-    def measure(self, state: np.ndarray) -> dict:
+    def measure(self, state) -> dict:
         """
-        Measure a CPU configuration.
+        Measure the GPU state, using CPU or GPU calculations.
 
-        Return named arrays, each with leading replica axis.
+        Return named CPU arrays, each with leading replica axis.
         """
         pass
 

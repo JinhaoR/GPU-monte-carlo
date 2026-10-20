@@ -78,5 +78,9 @@ class Runtime:
                 self.threads_per_block
             )
 
+    def measure(self):
+        """Let the model measure its GPU state and return CPU arrays."""
+        return self.model.measure(self.state)
+
     def snapshot(self):
         return self.state.copy_to_host()

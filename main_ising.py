@@ -1,4 +1,4 @@
-
+import argparse
 import numpy as np
 
 from core.runtime import Runtime
@@ -8,35 +8,38 @@ from models.ising.model import IsingModel
 from models.ising.analysis import IsingAnalysis
 
 
-sizes = [24, 32, 48, 64]
-temperatures = np.linspace(1.5, 3.5, 21)
+def main():
+    sizes = [24, 32, 48, 64]
+    temperatures = np.linspace(1.5, 3.5, 21)
 
-runs = {}
+    runs = {}
 
-for L in sizes:
-    print(f"Running Ising model: L = {L}")
+    for L in sizes:
+        print(f"Running Ising model: L = {L}")
 
-    model = IsingModel(J=1.0)
+        model = IsingModel(J=1.0)
 
-    runtime = Runtime(
-        model=model,
-        L=L,
-        temperatures=temperatures,
-        threads=16,
-        seed=42 + L
-    )
+        runtime = Runtime(
+            model=model,
+            L=L,
+            temperatures=temperatures,
+            threads=16,
+            seed=42 + L
+        )
 
-    simulation = Simulation(
-        runtime=runtime,
-        thermalization_sweeps=10000,
-        measurement_sweeps=100000,
-        sample_interval=10
-    )
+        simulation = Simulation(
+            runtime=runtime,
+            thermalization_sweeps= 10000,
+            measurement_sweeps=100000,
+            sample_interval=10
+        )
 
-    runs[L] = simulation.run()
+        runs[L] = simulation.run()
+
+    analysis = IsingAnalysis(runs)
+    analysis.plot()
+    return runs
 
 
-analysis = IsingAnalysis(runs)
-
-analysis.print_crossings()
-analysis.plot()
+if __name__ == "__main__":
+    main()
