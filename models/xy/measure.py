@@ -14,8 +14,8 @@ MEASUREMENT_NAMES = (
     "energy", "mx", "my", "twist_cos_x", "twist_sin_x"
 )
 
-@cuda.jit
-def xy_measure_kernel(state, output, J):
+@cuda.jit(device=True)
+def _xy_measure(state, output, J, temperature_indices):
     """One block per replica, one global output per channel and replica."""
     r = cuda.blockIdx.x
     tid = cuda.threadIdx.x
@@ -67,5 +67,51 @@ def xy_measure_kernel(state, output, J):
         stride //= 2
 
     if tid == 0:
+        destination = r if temperature_indices is None else temperature_indices[r]
         for channel in range(5):
-            output[channel, r] = shared[channel, 0]
+            output[channel, destination] = shared[channel, 0]
+
+
+@cuda.jit
+def xy_measure_kernel(state, output, J):
+    """Measurements in physical walker order."""
+    _xy_measure(state, output, J, None)
+
+
+@cuda.jit
+def xy_ordered_measure_kernel(state, output, J, temperature_indices):
+    """Measurements scattered into fixed temperature order on the GPU."""
+    _xy_measure(state, output, J, temperature_indices)
+
+
+@cuda.jit
+def xy_energy_kernel(state, output, J):
+    """Total Hamiltonian energy only, without transferring data to the CPU."""
+    r = cuda.blockIdx.x
+    tid = cuda.threadIdx.x
+    L = state.shape[1]
+    shared = cuda.shared.array(MEASURE_THREADS, dtype=float64)
+
+    energy = 0.0
+    for k in range(tid, L * L, cuda.blockDim.x):
+        i = k // L
+        j = k % L
+        theta = float64(state[r, i, j])
+        theta_x = float64(state[r, (i + 1) % L, j])
+        theta_y = float64(state[r, i, (j + 1) % L])
+        # Each periodic bond is counted once, as in xy_measure_kernel.
+        energy += -J * (
+            math.cos(theta - theta_x) + math.cos(theta - theta_y)
+        )
+
+    shared[tid] = energy
+    cuda.syncthreads()
+    stride = cuda.blockDim.x // 2
+    while stride > 0:
+        if tid < stride:
+            shared[tid] += shared[tid + stride]
+        cuda.syncthreads()
+        stride //= 2
+
+    if tid == 0:
+        output[r] = shared[0]

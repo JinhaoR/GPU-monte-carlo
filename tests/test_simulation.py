@@ -148,23 +148,26 @@ class SimulationTests(unittest.TestCase):
                     )
                     simulation = Simulation(
                         runtime, thermalization_sweeps=4,
-                        measurement_sweeps=12, sample_interval=5
+                        measurement_sweeps=102, sample_interval=5
                     )
                     with patch.object(
                         runtime, "sweep", wraps=runtime.sweep
                     ) as sweep:
                         run = simulation.run()
-                    self.assertEqual(sweep.call_count, 16)
+                    self.assertEqual(sweep.call_count, 106)
                     np.testing.assert_array_equal(
-                        run["metadata"]["sample_sweeps"], [9, 14]
+                        run["metadata"]["sample_sweeps"], np.arange(9, 105, 5)
                     )
                     for values in run["samples"].values():
                         self.assertIsInstance(values, np.ndarray)
-                        self.assertEqual(values.shape, (2, 2))
+                        self.assertEqual(values.shape, (20, 2))
                         self.assertTrue(np.all(np.isfinite(values)))
                     runs[L] = run
 
-                analysis = analysis_type(runs)
+                analysis = (
+                    analysis_type(runs, block_size=1)
+                    if model_type is XYModel else analysis_type(runs)
+                )
                 for values in analysis.results.values():
                     for observable in values.values():
                         self.assertTrue(np.all(np.isfinite(observable)))

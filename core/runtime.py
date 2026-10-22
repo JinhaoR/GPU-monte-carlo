@@ -78,9 +78,17 @@ class Runtime:
                 self.threads_per_block
             )
 
-    def measure(self):
-        """Let the model measure its GPU state and return CPU arrays."""
-        return self.model.measure(self.state)
+    def measure(self, temperature_indices=None):
+        """Return CPU measurements, optionally ordered by GPU temperature indices."""
+        if temperature_indices is None:
+            return self.model.measure(self.state)
+        return self.model.measure(
+            self.state, temperature_indices=temperature_indices
+        )
+
+    def measure_energy(self, output):
+        """Write current total energies to a float64 GPU array in walker order."""
+        return self.model.measure_energy(self.state, output)
 
     def snapshot(self):
         return self.state.copy_to_host()

@@ -1,5 +1,6 @@
 
 import numpy as np
+from core.parallel_tempering import ParallelTempering
 
 class Simulation:
 
@@ -86,6 +87,8 @@ class Simulation:
             "sample_interval": self.sample_interval,
             "sample_sweeps": np.asarray(sample_sweeps),
         }
+        if isinstance(rt, ParallelTempering):
+            metadata["parallel_tempering"] = rt.diagnostics()
 
         return {
             "samples": samples,

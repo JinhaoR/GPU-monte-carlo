@@ -5,7 +5,10 @@ import numpy as np
 from numba import cuda
 from core.model import Model
 from .update import metropolis_color
-from .measure import MEASUREMENT_NAMES, MEASURE_THREADS, xy_measure_kernel
+from .measure import (
+    MEASUREMENT_NAMES, MEASURE_THREADS, xy_measure_kernel,
+    xy_ordered_measure_kernel, xy_energy_kernel
+)
 
 
 class XYModel(Model):
@@ -26,13 +29,18 @@ class XYModel(Model):
             state, rng_states, betas, color, self.J, self.delta
         )
 
-    def measure(self, state):
+    def measure(self, state, temperature_indices=None):
         """Reduce the GPU state to five CPU measurement arrays."""
         R = state.shape[0]
         output = cuda.device_array(
             (len(MEASUREMENT_NAMES), R), dtype=np.float64
         )
-        xy_measure_kernel[R, MEASURE_THREADS](state, output, self.J)
+        if temperature_indices is None:
+            xy_measure_kernel[R, MEASURE_THREADS](state, output, self.J)
+        else:
+            xy_ordered_measure_kernel[R, MEASURE_THREADS](
+                state, output, self.J, temperature_indices
+            )
         results = output.copy_to_host()
 
         return {
@@ -42,3 +50,7 @@ class XYModel(Model):
 
     def parameters(self):
         return {"J": self.J, "delta": self.delta}
+
+    def measure_energy(self, state, output):
+        """Leave total energies on the GPU for replica exchange."""
+        xy_energy_kernel[state.shape[0], MEASURE_THREADS](state, output, self.J)

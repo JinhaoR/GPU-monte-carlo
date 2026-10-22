@@ -1,7 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-from utils.binder import binder_cumulant
+from utils.Analysis.binder import binder_cumulant
 
 class IsingAnalysis:
 
