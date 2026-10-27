@@ -1,0 +1,67 @@
+{
+  "L": 64,
+  "replicas": 100,
+  "warmup": 1000,
+  "sweeps": 3000,
+  "repeats": 6,
+  "old_source": "git HEAD 0bfd8ad models/he3/{update,measure,model}.py and core/runtime.py, loaded only into isolated memory modules",
+  "rows": [
+    {
+      "repeat": 0,
+      "order": [
+        "old",
+        "new"
+      ],
+      "old_ms": 0.3444303333332452,
+      "new_ms": 0.2036118999997901
+    },
+    {
+      "repeat": 1,
+      "order": [
+        "new",
+        "old"
+      ],
+      "new_ms": 0.21841989999969277,
+      "old_ms": 0.3496176666667452
+    },
+    {
+      "repeat": 2,
+      "order": [
+        "old",
+        "new"
+      ],
+      "old_ms": 0.35034766666649375,
+      "new_ms": 0.20410586666669892
+    },
+    {
+      "repeat": 3,
+      "order": [
+        "new",
+        "old"
+      ],
+      "new_ms": 0.22323259999999814,
+      "old_ms": 0.351488166666968
+    },
+    {
+      "repeat": 4,
+      "order": [
+        "old",
+        "new"
+      ],
+      "old_ms": 0.37229389999993145,
+      "new_ms": 0.21282616666697626
+    },
+    {
+      "repeat": 5,
+      "order": [
+        "new",
+        "old"
+      ],
+      "new_ms": 0.21012870000049588,
+      "old_ms": 0.353055766666633
+    }
+  ],
+  "old_median_ms": 0.3509179166667309,
+  "new_median_ms": 0.2114774333337361,
+  "speedup": 1.6593634182846424
+}

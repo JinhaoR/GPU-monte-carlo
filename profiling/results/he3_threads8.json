@@ -1,0 +1,298 @@
+{
+  "device": "NVIDIA GeForce RTX 4070 SUPER",
+  "arguments": {
+    "sizes": [
+      32,
+      48,
+      64,
+      80
+    ],
+    "replicas": 100,
+    "threads": 8,
+    "warmup": 1000,
+    "sweeps": 3000,
+    "repeats": 5,
+    "modes": [
+      "updates",
+      "pt",
+      "production"
+    ],
+    "cuda_profile_api": false,
+    "output": "profiling\\results\\he3_threads8.json",
+    "dump_ptx": null
+  },
+  "cases": [
+    {
+      "L": 32,
+      "replicas": 100,
+      "mode": "updates",
+      "threads": 8,
+      "iterations": 3000,
+      "seconds": [
+        0.4197048999994877,
+        0.441075800001272,
+        0.44256360000144923,
+        0.4406877999972494,
+        0.43466869999974733
+      ],
+      "median_seconds": 0.4406877999972494,
+      "median_ms_per_iteration": 0.14689593333241646,
+      "setup_and_warmup_seconds": 2.5428596999990987,
+      "site_proposals_per_second": 697092136.4329065,
+      "sweeps_per_second": 6807.540394852603
+    },
+    {
+      "L": 32,
+      "replicas": 100,
+      "mode": "pt",
+      "threads": 8,
+      "iterations": 3000,
+      "seconds": [
+        0.4691865999993752,
+        0.4107953999991878,
+        0.36675020000257064,
+        0.3805004999994708,
+        0.3757218999999168
+      ],
+      "median_seconds": 0.3805004999994708,
+      "median_ms_per_iteration": 0.1268334999998236,
+      "setup_and_warmup_seconds": 2.5428596999990987,
+      "site_proposals_per_second": 807357677.5863035,
+      "sweeps_per_second": 7884.352320178745
+    },
+    {
+      "L": 32,
+      "replicas": 100,
+      "mode": "production",
+      "threads": 8,
+      "iterations": 3000,
+      "seconds": [
+        0.5081454999999551,
+        0.512231000000611,
+        0.5480028999991191,
+        0.537139299998671,
+        0.5850933999972767
+      ],
+      "median_seconds": 0.537139299998671,
+      "median_ms_per_iteration": 0.17904643333289036,
+      "setup_and_warmup_seconds": 2.5428596999990987,
+      "site_proposals_per_second": 571918681.058638,
+      "sweeps_per_second": 5585.143369713262
+    },
+    {
+      "L": 48,
+      "replicas": 100,
+      "mode": "updates",
+      "threads": 8,
+      "iterations": 3000,
+      "seconds": [
+        0.5675676999999268,
+        0.4278121999996074,
+        0.5361111999991408,
+        0.4435553000002983,
+        0.43267179999747896
+      ],
+      "median_seconds": 0.4435553000002983,
+      "median_ms_per_iteration": 0.1478517666667661,
+      "setup_and_warmup_seconds": 0.20624099999986356,
+      "site_proposals_per_second": 1558317531.0937219,
+      "sweeps_per_second": 6763.530950927612
+    },
+    {
+      "L": 48,
+      "replicas": 100,
+      "mode": "pt",
+      "threads": 8,
+      "iterations": 3000,
+      "seconds": [
+        0.5200021999989985,
+        0.5761440999995102,
+        0.5278383000004396,
+        0.5108455000008689,
+        0.49945970000044326
+      ],
+      "median_seconds": 0.5200021999989985,
+      "median_ms_per_iteration": 0.17333406666633286,
+      "setup_and_warmup_seconds": 0.20624099999986356,
+      "site_proposals_per_second": 1329225145.5884824,
+      "sweeps_per_second": 5769.206361061121
+    },
+    {
+      "L": 48,
+      "replicas": 100,
+      "mode": "production",
+      "threads": 8,
+      "iterations": 3000,
+      "seconds": [
+        0.7317871999985073,
+        0.7013278000013088,
+        0.7468193000022438,
+        0.747204999999667,
+        0.7483726999998908
+      ],
+      "median_seconds": 0.7468193000022438,
+      "median_ms_per_iteration": 0.2489397666674146,
+      "setup_and_warmup_seconds": 0.20624099999986356,
+      "site_proposals_per_second": 925525090.2031097,
+      "sweeps_per_second": 4017.0359817843305
+    },
+    {
+      "L": 64,
+      "replicas": 100,
+      "mode": "updates",
+      "threads": 8,
+      "iterations": 3000,
+      "seconds": [
+        0.791045199999644,
+        0.7795461999994586,
+        0.7928499000008742,
+        0.8275867000011203,
+        0.8112658000027295
+      ],
+      "median_seconds": 0.7928499000008742,
+      "median_ms_per_iteration": 0.2642833000002914,
+      "setup_and_warmup_seconds": 0.35368690000177594,
+      "site_proposals_per_second": 1549851995.9435513,
+      "sweeps_per_second": 3783.818349471561
+    },
+    {
+      "L": 64,
+      "replicas": 100,
+      "mode": "pt",
+      "threads": 8,
+      "iterations": 3000,
+      "seconds": [
+        0.9920400000009977,
+        0.9591997999996238,
+        0.9255095000007714,
+        0.9027479999967909,
+        0.9028686999990896
+      ],
+      "median_seconds": 0.9255095000007714,
+      "median_ms_per_iteration": 0.3085031666669238,
+      "setup_and_warmup_seconds": 0.35368690000177594,
+      "site_proposals_per_second": 1327701120.3007379,
+      "sweeps_per_second": 3241.4578132342235
+    },
+    {
+      "L": 64,
+      "replicas": 100,
+      "mode": "production",
+      "threads": 8,
+      "iterations": 3000,
+      "seconds": [
+        1.1873121999997238,
+        1.230280899999343,
+        1.2464198999987275,
+        1.219424999999319,
+        1.177377300002263
+      ],
+      "median_seconds": 1.219424999999319,
+      "median_ms_per_iteration": 0.406474999999773,
+      "setup_and_warmup_seconds": 0.35368690000177594,
+      "site_proposals_per_second": 1007688049.696116,
+      "sweeps_per_second": 2460.175902578408
+    },
+    {
+      "L": 80,
+      "replicas": 100,
+      "mode": "updates",
+      "threads": 8,
+      "iterations": 3000,
+      "seconds": [
+        1.1870331999998598,
+        1.1911269000011089,
+        1.1943600999984483,
+        1.1935099000002083,
+        1.2257055999980366
+      ],
+      "median_seconds": 1.1935099000002083,
+      "median_ms_per_iteration": 0.39783663333340274,
+      "setup_and_warmup_seconds": 0.5599006000011286,
+      "site_proposals_per_second": 1608700522.7184668,
+      "sweeps_per_second": 2513.5945667476044
+    },
+    {
+      "L": 80,
+      "replicas": 100,
+      "mode": "pt",
+      "threads": 8,
+      "iterations": 3000,
+      "seconds": [
+        1.3958786000002874,
+        1.3804982999972708,
+        1.3821873999986565,
+        1.3845080999999482,
+        1.3748455999993894
+      ],
+      "median_seconds": 1.3821873999986565,
+      "median_ms_per_iteration": 0.4607291333328855,
+      "setup_and_warmup_seconds": 0.5599006000011286,
+      "site_proposals_per_second": 1389102519.6741529,
+      "sweeps_per_second": 2170.472686990864
+    },
+    {
+      "L": 80,
+      "replicas": 100,
+      "mode": "production",
+      "threads": 8,
+      "iterations": 3000,
+      "seconds": [
+        1.7631861999980174,
+        1.7605394999991404,
+        1.7224744000013743,
+        1.7426760000016657,
+        1.74615249999988
+      ],
+      "median_seconds": 1.74615249999988,
+      "median_ms_per_iteration": 0.5820508333332933,
+      "setup_and_warmup_seconds": 0.5599006000011286,
+      "site_proposals_per_second": 1099560319.0443742,
+      "sweeps_per_second": 1718.062998506835
+    }
+  ],
+  "kernel_resources": {
+    "metropolis_color": {
+      "registers_per_thread": {
+        "(Array(complex64, 5, 'C', False, aligned=True), Array(Record([('s0', {'type': uint64, 'offset': 0, 'alignment': None, 'title': None, }), ('s1', {'type': uint64, 'offset': 8, 'alignment': None, 'title': None, })], 16, True), 1, 'C', False, aligned=True), Array(float32, 1, 'C', False, aligned=True), int64, UniTuple(float32, 5), float32, float32)": 71
+      },
+      "local_bytes_per_thread": {
+        "(Array(complex64, 5, 'C', False, aligned=True), Array(Record([('s0', {'type': uint64, 'offset': 0, 'alignment': None, 'title': None, }), ('s1', {'type': uint64, 'offset': 8, 'alignment': None, 'title': None, })], 16, True), 1, 'C', False, aligned=True), Array(float32, 1, 'C', False, aligned=True), int64, UniTuple(float32, 5), float32, float32)": 0
+      },
+      "shared_bytes_per_block": {
+        "(Array(complex64, 5, 'C', False, aligned=True), Array(Record([('s0', {'type': uint64, 'offset': 0, 'alignment': None, 'title': None, }), ('s1', {'type': uint64, 'offset': 8, 'alignment': None, 'title': None, })], 16, True), 1, 'C', False, aligned=True), Array(float32, 1, 'C', False, aligned=True), int64, UniTuple(float32, 5), float32, float32)": 0
+      },
+      "max_threads_per_block": {
+        "(Array(complex64, 5, 'C', False, aligned=True), Array(Record([('s0', {'type': uint64, 'offset': 0, 'alignment': None, 'title': None, }), ('s1', {'type': uint64, 'offset': 8, 'alignment': None, 'title': None, })], 16, True), 1, 'C', False, aligned=True), Array(float32, 1, 'C', False, aligned=True), int64, UniTuple(float32, 5), float32, float32)": 896
+      }
+    },
+    "he3_energy_kernel": {
+      "registers_per_thread": {
+        "(Array(complex64, 5, 'C', False, aligned=True), Array(float64, 1, 'C', False, aligned=True), UniTuple(float32, 5), float32)": 72
+      },
+      "local_bytes_per_thread": {
+        "(Array(complex64, 5, 'C', False, aligned=True), Array(float64, 1, 'C', False, aligned=True), UniTuple(float32, 5), float32)": 0
+      },
+      "shared_bytes_per_block": {
+        "(Array(complex64, 5, 'C', False, aligned=True), Array(float64, 1, 'C', False, aligned=True), UniTuple(float32, 5), float32)": 2048
+      },
+      "max_threads_per_block": {
+        "(Array(complex64, 5, 'C', False, aligned=True), Array(float64, 1, 'C', False, aligned=True), UniTuple(float32, 5), float32)": 896
+      }
+    },
+    "he3_ordered_measure_kernel": {
+      "registers_per_thread": {
+        "(Array(complex64, 5, 'C', False, aligned=True), Array(float64, 2, 'C', False, aligned=True), UniTuple(float32, 5), float32, Array(int32, 1, 'C', False, aligned=True))": 156
+      },
+      "local_bytes_per_thread": {
+        "(Array(complex64, 5, 'C', False, aligned=True), Array(float64, 2, 'C', False, aligned=True), UniTuple(float32, 5), float32, Array(int32, 1, 'C', False, aligned=True))": 0
+      },
+      "shared_bytes_per_block": {
+        "(Array(complex64, 5, 'C', False, aligned=True), Array(float64, 2, 'C', False, aligned=True), UniTuple(float32, 5), float32, Array(int32, 1, 'C', False, aligned=True))": 18432
+      },
+      "max_threads_per_block": {
+        "(Array(complex64, 5, 'C', False, aligned=True), Array(float64, 2, 'C', False, aligned=True), UniTuple(float32, 5), float32, Array(int32, 1, 'C', False, aligned=True))": 384
+      }
+    }
+  }
+}

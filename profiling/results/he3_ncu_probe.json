@@ -1,0 +1,78 @@
+{
+  "device": "NVIDIA GeForce RTX 4070 SUPER",
+  "arguments": {
+    "sizes": [
+      64
+    ],
+    "replicas": 100,
+    "threads": 16,
+    "warmup": 100,
+    "sweeps": 1,
+    "repeats": 1,
+    "modes": [
+      "probe"
+    ],
+    "cuda_profile_api": true,
+    "output": "profiling\\results\\he3_ncu_probe.json",
+    "dump_ptx": null
+  },
+  "cases": [
+    {
+      "L": 64,
+      "replicas": 100,
+      "mode": "probe",
+      "threads": 16,
+      "iterations": 1,
+      "seconds": [
+        0.9669953999982681
+      ],
+      "median_seconds": 0.9669953999982681,
+      "median_ms_per_iteration": 966.9953999982681,
+      "setup_and_warmup_seconds": 2.5018950999983645
+    }
+  ],
+  "kernel_resources": {
+    "metropolis_color": {
+      "registers_per_thread": {
+        "(Array(complex64, 5, 'C', False, aligned=True), Array(Record([('s0', {'type': uint64, 'offset': 0, 'alignment': None, 'title': None, }), ('s1', {'type': uint64, 'offset': 8, 'alignment': None, 'title': None, })], 16, True), 1, 'C', False, aligned=True), Array(float32, 1, 'C', False, aligned=True), int64, UniTuple(float32, 5), float32, float32)": 71
+      },
+      "local_bytes_per_thread": {
+        "(Array(complex64, 5, 'C', False, aligned=True), Array(Record([('s0', {'type': uint64, 'offset': 0, 'alignment': None, 'title': None, }), ('s1', {'type': uint64, 'offset': 8, 'alignment': None, 'title': None, })], 16, True), 1, 'C', False, aligned=True), Array(float32, 1, 'C', False, aligned=True), int64, UniTuple(float32, 5), float32, float32)": 0
+      },
+      "shared_bytes_per_block": {
+        "(Array(complex64, 5, 'C', False, aligned=True), Array(Record([('s0', {'type': uint64, 'offset': 0, 'alignment': None, 'title': None, }), ('s1', {'type': uint64, 'offset': 8, 'alignment': None, 'title': None, })], 16, True), 1, 'C', False, aligned=True), Array(float32, 1, 'C', False, aligned=True), int64, UniTuple(float32, 5), float32, float32)": 0
+      },
+      "max_threads_per_block": {
+        "(Array(complex64, 5, 'C', False, aligned=True), Array(Record([('s0', {'type': uint64, 'offset': 0, 'alignment': None, 'title': None, }), ('s1', {'type': uint64, 'offset': 8, 'alignment': None, 'title': None, })], 16, True), 1, 'C', False, aligned=True), Array(float32, 1, 'C', False, aligned=True), int64, UniTuple(float32, 5), float32, float32)": 896
+      }
+    },
+    "he3_energy_kernel": {
+      "registers_per_thread": {
+        "(Array(complex64, 5, 'C', False, aligned=True), Array(float64, 1, 'C', False, aligned=True), UniTuple(float32, 5), float32)": 72
+      },
+      "local_bytes_per_thread": {
+        "(Array(complex64, 5, 'C', False, aligned=True), Array(float64, 1, 'C', False, aligned=True), UniTuple(float32, 5), float32)": 0
+      },
+      "shared_bytes_per_block": {
+        "(Array(complex64, 5, 'C', False, aligned=True), Array(float64, 1, 'C', False, aligned=True), UniTuple(float32, 5), float32)": 2048
+      },
+      "max_threads_per_block": {
+        "(Array(complex64, 5, 'C', False, aligned=True), Array(float64, 1, 'C', False, aligned=True), UniTuple(float32, 5), float32)": 896
+      }
+    },
+    "he3_ordered_measure_kernel": {
+      "registers_per_thread": {
+        "(Array(complex64, 5, 'C', False, aligned=True), Array(float64, 2, 'C', False, aligned=True), UniTuple(float32, 5), float32, Array(int32, 1, 'C', False, aligned=True))": 156
+      },
+      "local_bytes_per_thread": {
+        "(Array(complex64, 5, 'C', False, aligned=True), Array(float64, 2, 'C', False, aligned=True), UniTuple(float32, 5), float32, Array(int32, 1, 'C', False, aligned=True))": 0
+      },
+      "shared_bytes_per_block": {
+        "(Array(complex64, 5, 'C', False, aligned=True), Array(float64, 2, 'C', False, aligned=True), UniTuple(float32, 5), float32, Array(int32, 1, 'C', False, aligned=True))": 18432
+      },
+      "max_threads_per_block": {
+        "(Array(complex64, 5, 'C', False, aligned=True), Array(float64, 2, 'C', False, aligned=True), UniTuple(float32, 5), float32, Array(int32, 1, 'C', False, aligned=True))": 384
+      }
+    }
+  }
+}

@@ -1,0 +1,118 @@
+{
+  "device": "NVIDIA GeForce RTX 4070 SUPER",
+  "arguments": {
+    "sizes": [
+      64
+    ],
+    "replicas": 100,
+    "threads": 16,
+    "warmup": 200,
+    "sweeps": 200,
+    "repeats": 3,
+    "modes": [
+      "updates",
+      "pt",
+      "production"
+    ],
+    "cuda_profile_api": false,
+    "output": "profiling\\results\\he3_pilot.json",
+    "dump_ptx": "profiling\\results\\ptx"
+  },
+  "cases": [
+    {
+      "L": 64,
+      "replicas": 100,
+      "mode": "updates",
+      "threads": 16,
+      "iterations": 200,
+      "seconds": [
+        0.046806300000753254,
+        0.04865029999928083,
+        0.04892230000041309
+      ],
+      "median_seconds": 0.04865029999928083,
+      "median_ms_per_iteration": 0.24325149999640416,
+      "setup_and_warmup_seconds": 2.5153422000003047,
+      "site_proposals_per_second": 1683853953.6490211,
+      "sweeps_per_second": 4110.971566525931
+    },
+    {
+      "L": 64,
+      "replicas": 100,
+      "mode": "pt",
+      "threads": 16,
+      "iterations": 200,
+      "seconds": [
+        0.06254660000195145,
+        0.06177080000270507,
+        0.059776599999167956
+      ],
+      "median_seconds": 0.06177080000270507,
+      "median_ms_per_iteration": 0.30885400001352536,
+      "setup_and_warmup_seconds": 2.5153422000003047,
+      "site_proposals_per_second": 1326192958.4271622,
+      "sweeps_per_second": 3237.775777410064
+    },
+    {
+      "L": 64,
+      "replicas": 100,
+      "mode": "production",
+      "threads": 16,
+      "iterations": 200,
+      "seconds": [
+        0.07844339999792282,
+        0.07959409999966738,
+        0.07193869999900926
+      ],
+      "median_seconds": 0.07844339999792282,
+      "median_ms_per_iteration": 0.3922169999896141,
+      "setup_and_warmup_seconds": 2.5153422000003047,
+      "site_proposals_per_second": 1044319853.5781115,
+      "sweeps_per_second": 2549.6090175246864
+    }
+  ],
+  "kernel_resources": {
+    "metropolis_color": {
+      "registers_per_thread": {
+        "(Array(complex64, 5, 'C', False, aligned=True), Array(Record([('s0', {'type': uint64, 'offset': 0, 'alignment': None, 'title': None, }), ('s1', {'type': uint64, 'offset': 8, 'alignment': None, 'title': None, })], 16, True), 1, 'C', False, aligned=True), Array(float32, 1, 'C', False, aligned=True), int64, UniTuple(float32, 5), float32, float32)": 71
+      },
+      "local_bytes_per_thread": {
+        "(Array(complex64, 5, 'C', False, aligned=True), Array(Record([('s0', {'type': uint64, 'offset': 0, 'alignment': None, 'title': None, }), ('s1', {'type': uint64, 'offset': 8, 'alignment': None, 'title': None, })], 16, True), 1, 'C', False, aligned=True), Array(float32, 1, 'C', False, aligned=True), int64, UniTuple(float32, 5), float32, float32)": 0
+      },
+      "shared_bytes_per_block": {
+        "(Array(complex64, 5, 'C', False, aligned=True), Array(Record([('s0', {'type': uint64, 'offset': 0, 'alignment': None, 'title': None, }), ('s1', {'type': uint64, 'offset': 8, 'alignment': None, 'title': None, })], 16, True), 1, 'C', False, aligned=True), Array(float32, 1, 'C', False, aligned=True), int64, UniTuple(float32, 5), float32, float32)": 0
+      },
+      "max_threads_per_block": {
+        "(Array(complex64, 5, 'C', False, aligned=True), Array(Record([('s0', {'type': uint64, 'offset': 0, 'alignment': None, 'title': None, }), ('s1', {'type': uint64, 'offset': 8, 'alignment': None, 'title': None, })], 16, True), 1, 'C', False, aligned=True), Array(float32, 1, 'C', False, aligned=True), int64, UniTuple(float32, 5), float32, float32)": 896
+      }
+    },
+    "he3_energy_kernel": {
+      "registers_per_thread": {
+        "(Array(complex64, 5, 'C', False, aligned=True), Array(float64, 1, 'C', False, aligned=True), UniTuple(float32, 5), float32)": 72
+      },
+      "local_bytes_per_thread": {
+        "(Array(complex64, 5, 'C', False, aligned=True), Array(float64, 1, 'C', False, aligned=True), UniTuple(float32, 5), float32)": 0
+      },
+      "shared_bytes_per_block": {
+        "(Array(complex64, 5, 'C', False, aligned=True), Array(float64, 1, 'C', False, aligned=True), UniTuple(float32, 5), float32)": 2048
+      },
+      "max_threads_per_block": {
+        "(Array(complex64, 5, 'C', False, aligned=True), Array(float64, 1, 'C', False, aligned=True), UniTuple(float32, 5), float32)": 896
+      }
+    },
+    "he3_ordered_measure_kernel": {
+      "registers_per_thread": {
+        "(Array(complex64, 5, 'C', False, aligned=True), Array(float64, 2, 'C', False, aligned=True), UniTuple(float32, 5), float32, Array(int32, 1, 'C', False, aligned=True))": 156
+      },
+      "local_bytes_per_thread": {
+        "(Array(complex64, 5, 'C', False, aligned=True), Array(float64, 2, 'C', False, aligned=True), UniTuple(float32, 5), float32, Array(int32, 1, 'C', False, aligned=True))": 0
+      },
+      "shared_bytes_per_block": {
+        "(Array(complex64, 5, 'C', False, aligned=True), Array(float64, 2, 'C', False, aligned=True), UniTuple(float32, 5), float32, Array(int32, 1, 'C', False, aligned=True))": 18432
+      },
+      "max_threads_per_block": {
+        "(Array(complex64, 5, 'C', False, aligned=True), Array(float64, 2, 'C', False, aligned=True), UniTuple(float32, 5), float32, Array(int32, 1, 'C', False, aligned=True))": 384
+      }
+    }
+  }
+}

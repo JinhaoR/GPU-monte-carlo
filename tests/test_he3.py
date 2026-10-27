@@ -139,20 +139,28 @@ class He3Tests(unittest.TestCase):
         K = np.float32(0.73)
         betas = np.asarray((-0.4, 1.1, 0.8, 1.3, -0.7), dtype=np.float32)
         model = He3Model(K=K, betas=betas)
-        for L in (4, 6, 20):
+        for L in (4, 6, 20, 80):
             state = self.random_state(L)
             device = cuda.to_device(state)
             expected = reference(state, float(K), betas.astype(float))
             measured = model.measure(device)
             for name in expected:
-                np.testing.assert_allclose(measured[name], expected[name], atol=1e-9, rtol=1e-12)
+                # Local algebra uses float32, while lattice sums use float64.
+                # For these bounded fields, check an absolute per-site budget
+                # against the independent double-precision Hamiltonian.
+                budget = (8 if name == "energy" else 2) * np.finfo(np.float32).eps
+                np.testing.assert_allclose(measured[name] / L**2, expected[name] / L**2,
+                                           atol=budget, rtol=0, err_msg=name)
             energy = cuda.device_array(3, dtype=np.float64)
             model.measure_energy(device, energy)
-            np.testing.assert_allclose(energy.copy_to_host(), expected["energy"], atol=1e-9)
+            np.testing.assert_array_equal(energy.copy_to_host(), measured["energy"])
+            cached = model.measure_with_energy(device, energy)
+            for name in measured:
+                np.testing.assert_array_equal(cached[name], measured[name])
             order = np.array([2, 0, 1], dtype=np.int32)
             ordered = model.measure(device, cuda.to_device(order))
             for name in measured:
-                np.testing.assert_allclose(ordered[name][order], measured[name], atol=1e-12)
+                np.testing.assert_array_equal(ordered[name][order], measured[name])
 
     def test_helicity_derivatives_of_the_twisted_hamiltonian(self):
         K = np.float32(0.73)

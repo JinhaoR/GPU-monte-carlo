@@ -1,0 +1,326 @@
+test_fixed_seed_is_reproducible_and_supports_generators (test_analysis_statistics.BootstrapBlockMeanTests.test_fixed_seed_is_reproducible_and_supports_generators) ... ok
+test_full_channel_temperature_covariance_is_preserved (test_analysis_statistics.BootstrapBlockMeanTests.test_full_channel_temperature_covariance_is_preserved) ... ok
+test_resample_means_match_explicit_multinomial_counts (test_analysis_statistics.BootstrapBlockMeanTests.test_resample_means_match_explicit_multinomial_counts) ... ok
+test_bootstrap_error_requires_defined_draws (test_analysis_statistics.ErrorEstimateTests.test_bootstrap_error_requires_defined_draws) ... ok
+test_two_blocks_are_the_minimum_for_an_error (test_analysis_statistics.ErrorEstimateTests.test_two_blocks_are_the_minimum_for_an_error) ... FAIL
+test_linear_jackknife_matches_blocked_standard_error (test_analysis_statistics.JackknifeTests.test_linear_jackknife_matches_blocked_standard_error) ... ok
+test_nonlinear_jackknife_matches_deleting_contiguous_raw_blocks (test_analysis_statistics.JackknifeTests.test_nonlinear_jackknife_matches_deleting_contiguous_raw_blocks) ... ok
+test_preblocked_api_matches_legacy_api (test_analysis_statistics.JackknifeTests.test_preblocked_api_matches_legacy_api) ... ok
+test_analyze_cli (unittest.loader._FailedTest.test_analyze_cli) ... ERROR
+test_absolute_energy_units_are_not_assumed_to_be_unit_J (test_bkt.WeberMinnhagenTests.test_absolute_energy_units_are_not_assumed_to_be_unit_J) ... ok
+test_boundary_is_not_a_critical_temperature_estimate (test_bkt.WeberMinnhagenTests.test_boundary_is_not_a_critical_temperature_estimate) ... ok
+test_flat_temperature_profile_is_explicit (test_bkt.WeberMinnhagenTests.test_flat_temperature_profile_is_explicit) ... FAIL
+test_insufficient_size_or_temperature_data (test_bkt.WeberMinnhagenTests.test_insufficient_size_or_temperature_data) ... ERROR
+test_known_critical_curve_with_sub_grid_temperature (test_bkt.WeberMinnhagenTests.test_known_critical_curve_with_sub_grid_temperature) ... ok
+test_refinement_does_not_shrink_away_from_a_better_minimum (test_bkt.WeberMinnhagenTests.test_refinement_does_not_shrink_away_from_a_better_minimum) ... ok
+test_size_cut_and_unsorted_inputs (test_bkt.WeberMinnhagenTests.test_size_cut_and_unsorted_inputs) ... ERROR
+test_uncertainty_weighting_downweights_a_bad_size (test_bkt.WeberMinnhagenTests.test_uncertainty_weighting_downweights_a_bad_size) ... ok
+test_vanishing_correction_is_not_a_finite_C (test_bkt.WeberMinnhagenTests.test_vanishing_correction_is_not_a_finite_C) ... ERROR
+test_zero_error_is_not_a_valid_weight (test_bkt.WeberMinnhagenTests.test_zero_error_is_not_a_valid_weight) ... C:\Users\jinhao\Desktop\Projects\GPU-monte-carlo\utils\Analysis\bkt.py:18: RuntimeWarning: divide by zero encountered in divide
+  return (measured - predicted) / uncertainty
+C:\Users\jinhao\AppData\Local\Programs\Python\Python312\Lib\site-packages\scipy\optimize\_numdiff.py:710: RuntimeWarning: invalid value encountered in subtract
+  df = [f_eval - f0 for f_eval in f_evals]
+ERROR
+test_ambiguous_or_missing_draws_do_not_get_a_selected_branch (test_crossings.CrossingTests.test_ambiguous_or_missing_draws_do_not_get_a_selected_branch) ... ok
+test_bootstrap_uncertainty_for_a_unique_crossing (test_crossings.CrossingTests.test_bootstrap_uncertainty_for_a_unique_crossing) ... ok
+test_exact_endpoints_and_multiple_roots (test_crossings.CrossingTests.test_exact_endpoints_and_multiple_roots) ... ok
+test_flat_interval_and_undefined_curve_have_no_unique_root (test_crossings.CrossingTests.test_flat_interval_and_undefined_curve_have_no_unique_root) ... FAIL
+test_nonuniform_grid_and_two_curves (test_crossings.CrossingTests.test_nonuniform_grid_and_two_curves) ... ok
+test_paired_temperature_and_channel_covariance (test_crossings.CrossingTests.test_paired_temperature_and_channel_covariance) ... ok
+test_search_window_does_not_extrapolate (test_crossings.CrossingTests.test_search_window_does_not_extrapolate) ... ok
+test_default_model_hook_preserves_xy_and_ising_measurements_and_ordering (test_energy_cache.EnergyCacheTests.test_default_model_hook_preserves_xy_and_ising_measurements_and_ordering) ... ok
+test_explicit_invalidation_handles_external_state_and_hamiltonian_changes (test_energy_cache.EnergyCacheTests.test_explicit_invalidation_handles_external_state_and_hamiltonian_changes) ... ok
+test_failed_energy_refresh_cannot_publish_a_partially_overwritten_cache (test_energy_cache.EnergyCacheTests.test_failed_energy_refresh_cannot_publish_a_partially_overwritten_cache) ... ok
+test_failed_sweep_cannot_reuse_energy_from_before_partial_updates (test_energy_cache.EnergyCacheTests.test_failed_sweep_cannot_reuse_energy_from_before_partial_updates) ... ok
+test_he3_cached_measurements_match_full_measurements_and_keep_energy_readonly (test_energy_cache.EnergyCacheTests.test_he3_cached_measurements_match_full_measurements_and_keep_energy_readonly) ... ok
+test_he3_postexchange_measurement_uses_walker_energy_and_new_temperature_order (test_energy_cache.EnergyCacheTests.test_he3_postexchange_measurement_uses_walker_energy_and_new_temperature_order) ... ok
+test_sweep_invalidates_cached_energy_before_state_updates (test_energy_cache.EnergyCacheTests.test_sweep_invalidates_cached_energy_before_state_updates) ... ok
+test_pressure_corrections_match_the_published_table (test_he3.CoefficientTests.test_pressure_corrections_match_the_published_table) ... ok
+test_pressure_opt_in_temperature_scaling_and_custom_baseline (test_he3.CoefficientTests.test_pressure_opt_in_temperature_scaling_and_custom_baseline) ... ok
+test_global_gauge_spin_symmetry_and_phase_candidate (test_he3.He3Tests.test_global_gauge_spin_symmetry_and_phase_candidate) ... ok
+test_helicity_derivatives_of_the_twisted_hamiltonian (test_he3.He3Tests.test_helicity_derivatives_of_the_twisted_hamiltonian) ... ok
+test_local_changes_include_all_gradient_cells (test_he3.He3Tests.test_local_changes_include_all_gradient_cells) ... ok
+test_measurements_total_energy_and_temperature_order (test_he3.He3Tests.test_measurements_total_energy_and_temperature_order) ... ok
+test_ordered_state_and_binder_normalizations (test_he3.He3Tests.test_ordered_state_and_binder_normalizations) ... ok
+test_simulation_pt_save_and_analysis (test_he3.He3Tests.test_simulation_pt_save_and_analysis) ... ok
+test_updates_move_hot_fields_and_preserve_a_cold_minimum (test_he3.He3Tests.test_updates_move_hot_fields_and_preserve_a_cold_minimum) ... ok
+test_forward_and_reverse_differences (test_he3_energy_difference.DirectEnergyDifferenceTests.test_forward_and_reverse_differences) ... ok
+test_four_color_changes_with_padded_gpu_launches (test_he3_energy_difference.DirectEnergyDifferenceTests.test_four_color_changes_with_padded_gpu_launches) ... ok
+test_homogeneous_fields_and_small_actual_rounded_increments (test_he3_energy_difference.DirectEnergyDifferenceTests.test_homogeneous_fields_and_small_actual_rounded_increments) ... ok
+test_random_nonunitary_fields_pressures_and_periodic_boundaries (test_he3_energy_difference.DirectEnergyDifferenceTests.test_random_nonunitary_fields_pressures_and_periodic_boundaries) ... ok
+test_binder_normalization_and_existing_ising_observables (test_ising_analysis.IsingAnalysisTests.test_binder_normalization_and_existing_ising_observables) ... ERROR
+test_local_energy_changes_match_the_total_hamiltonian (test_kawamura.KawamuraTests.test_local_energy_changes_match_the_total_hamiltonian) ... ok
+test_local_gauge_symmetry (test_kawamura.KawamuraTests.test_local_gauge_symmetry) ... ok
+test_measurements_energy_only_and_temperature_order (test_kawamura.KawamuraTests.test_measurements_energy_only_and_temperature_order) ... ok
+test_ordered_energy_and_observables (test_kawamura.KawamuraTests.test_ordered_energy_and_observables) ... ok
+test_simulation_pt_save_and_analysis (test_kawamura.KawamuraTests.test_simulation_pt_save_and_analysis) ... ok
+test_updates_keep_constraints_and_accept_the_hot_limit (test_kawamura.KawamuraTests.test_updates_keep_constraints_and_accept_the_hot_limit) ... ok
+test_acceptance_sign_and_current_total_ising_energies (test_parallel_tempering.ParallelTemperingTests.test_acceptance_sign_and_current_total_ising_energies) ... ok
+test_accepted_exchanges_preserve_walkers_and_order_every_channel (test_parallel_tempering.ParallelTemperingTests.test_accepted_exchanges_preserve_walkers_and_order_every_channel) ... ok
+test_exchange_block_handles_more_pairs_than_threads (test_parallel_tempering.ParallelTemperingTests.test_exchange_block_handles_more_pairs_than_threads) ... ok
+test_exchange_interval_and_two_walker_round_trip (test_parallel_tempering.ParallelTemperingTests.test_exchange_interval_and_two_walker_round_trip) ... ok
+test_interior_walker_round_trip_starts_at_first_endpoint (test_parallel_tempering.ParallelTemperingTests.test_interior_walker_round_trip_starts_at_first_endpoint) ... ok
+test_invalid_ladders_and_exchange_intervals (test_parallel_tempering.ParallelTemperingTests.test_invalid_ladders_and_exchange_intervals) ... ok
+test_nonfinite_energy_prevents_swap_and_diagnostics_raise (test_parallel_tempering.ParallelTemperingTests.test_nonfinite_energy_prevents_swap_and_diagnostics_raise) ... ok
+test_odd_replica_count_alternates_disjoint_neighbor_pairs (test_parallel_tempering.ParallelTemperingTests.test_odd_replica_count_alternates_disjoint_neighbor_pairs) ... ok
+test_simulation_preserves_temperature_order_and_saves_diagnostics (test_parallel_tempering.ParallelTemperingTests.test_simulation_preserves_temperature_order_and_saves_diagnostics) ... ok
+test_xy_exchange_energies_are_fresh_and_match_cpu_bonds (test_parallel_tempering.ParallelTemperingTests.test_xy_exchange_energies_are_fresh_and_match_cpu_bonds) ... ok
+test_ordinary_runs_are_skipped_and_no_physics_channels_are_needed (test_pt_analysis.PTAnalysisTests.test_ordinary_runs_are_skipped_and_no_physics_channels_are_needed) ... ok
+test_plot_and_report_preserve_inputs_and_counter_scope (test_pt_analysis.PTAnalysisTests.test_plot_and_report_preserve_inputs_and_counter_scope) ... FAIL
+test_unattempted_edges_and_unfinished_trips_have_no_mean (test_pt_analysis.PTAnalysisTests.test_unattempted_edges_and_unfinished_trips_have_no_mean) ... ok
+test_weighted_rates_and_completed_trip_times (test_pt_analysis.PTAnalysisTests.test_weighted_rates_and_completed_trip_times) ... ok
+test_both_models_run_analyze_and_plot_multiple_sizes (test_simulation.SimulationTests.test_both_models_run_analyze_and_plot_multiple_sizes) ... 
+  test_both_models_run_analyze_and_plot_multiple_sizes (test_simulation.SimulationTests.test_both_models_run_analyze_and_plot_multiple_sizes) (model='IsingModel') ... ERROR
+test_ising_measurements_match_cpu_bond_count (test_simulation.SimulationTests.test_ising_measurements_match_cpu_bond_count) ... ok
+test_ising_updates_in_temperature_limits (test_simulation.SimulationTests.test_ising_updates_in_temperature_limits) ... ok
+test_ordered_and_alternating_ising_measurements (test_simulation.SimulationTests.test_ordered_and_alternating_ising_measurements) ... ok
+test_ordered_xy_measurements_include_coupling (test_simulation.SimulationTests.test_ordered_xy_measurements_include_coupling) ... ok
+test_xy_measurements_match_independent_cpu_reference (test_simulation.SimulationTests.test_xy_measurements_match_independent_cpu_reference) ... ok
+test_all_size_pairs_and_minimum_size_fits (test_xy_analysis.XYAnalysisTests.test_all_size_pairs_and_minimum_size_fits) ... ERROR
+test_existing_observables_and_corrected_errors_are_preserved (test_xy_analysis.XYAnalysisTests.test_existing_observables_and_corrected_errors_are_preserved) ... ERROR
+test_existing_raw_plot_keeps_observables_and_error_bars (test_xy_analysis.XYAnalysisTests.test_existing_raw_plot_keeps_observables_and_error_bars) ... ERROR
+test_joint_crossing_errors_and_ambiguous_curves (test_xy_analysis.XYAnalysisTests.test_joint_crossing_errors_and_ambiguous_curves) ... ERROR
+test_reproducibility_json_and_input_immutability (test_xy_analysis.XYAnalysisTests.test_reproducibility_json_and_input_immutability) ... ERROR
+test_singular_bootstrap_moments_remain_explicitly_undefined (test_xy_analysis.XYAnalysisTests.test_singular_bootstrap_moments_remain_explicitly_undefined) ... ERROR
+test_size_cut_and_temperature_window (test_xy_analysis.XYAnalysisTests.test_size_cut_and_temperature_window) ... ERROR
+test_wm_plot_rescales_values_and_errors_with_one_shared_constant (test_xy_analysis.XYAnalysisTests.test_wm_plot_rescales_values_and_errors_with_one_shared_constant) ... ERROR
+test_zero_uncertainty_cannot_be_used_as_a_weight (test_xy_analysis.XYAnalysisTests.test_zero_uncertainty_cannot_be_used_as_a_weight) ... ERROR
+
+======================================================================
+ERROR: test_analyze_cli (unittest.loader._FailedTest.test_analyze_cli)
+----------------------------------------------------------------------
+ImportError: Failed to import test module: test_analyze_cli
+Traceback (most recent call last):
+  File "C:\Users\jinhao\AppData\Local\Programs\Python\Python312\Lib\unittest\loader.py", line 396, in _find_test_path
+    module = self._get_module_from_name(name)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\jinhao\AppData\Local\Programs\Python\Python312\Lib\unittest\loader.py", line 339, in _get_module_from_name
+    __import__(name)
+  File "C:\Users\jinhao\Desktop\Projects\GPU-monte-carlo\tests\test_analyze_cli.py", line 16, in <module>
+    import analyze
+ModuleNotFoundError: No module named 'analyze'
+
+
+======================================================================
+ERROR: test_insufficient_size_or_temperature_data (test_bkt.WeberMinnhagenTests.test_insufficient_size_or_temperature_data)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\jinhao\Desktop\Projects\GPU-monte-carlo\tests\test_bkt.py", line 80, in test_insufficient_size_or_temperature_data
+    fit = self.fit(min_size=64)
+          ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\jinhao\Desktop\Projects\GPU-monte-carlo\tests\test_bkt.py", line 25, in fit
+    return fit_weber_minnhagen(self.temperatures, self.sizes,
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: fit_weber_minnhagen() got an unexpected keyword argument 'min_size'
+
+======================================================================
+ERROR: test_size_cut_and_unsorted_inputs (test_bkt.WeberMinnhagenTests.test_size_cut_and_unsorted_inputs)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\jinhao\Desktop\Projects\GPU-monte-carlo\tests\test_bkt.py", line 71, in test_size_cut_and_unsorted_inputs
+    fit = fit_weber_minnhagen(self.temperatures, self.sizes[order],
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: fit_weber_minnhagen() got an unexpected keyword argument 'min_size'
+
+======================================================================
+ERROR: test_vanishing_correction_is_not_a_finite_C (test_bkt.WeberMinnhagenTests.test_vanishing_correction_is_not_a_finite_C)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\jinhao\Desktop\Projects\GPU-monte-carlo\tests\test_bkt.py", line 101, in test_vanishing_correction_is_not_a_finite_C
+    self.assertIn("infinite", fit["reason"])
+  File "C:\Users\jinhao\AppData\Local\Programs\Python\Python312\Lib\unittest\case.py", line 1149, in assertIn
+    if member not in container:
+       ^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: argument of type 'NoneType' is not iterable
+
+======================================================================
+ERROR: test_zero_error_is_not_a_valid_weight (test_bkt.WeberMinnhagenTests.test_zero_error_is_not_a_valid_weight)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\jinhao\Desktop\Projects\GPU-monte-carlo\tests\test_bkt.py", line 112, in test_zero_error_is_not_a_valid_weight
+    fit = self.fit()
+          ^^^^^^^^^^
+  File "C:\Users\jinhao\Desktop\Projects\GPU-monte-carlo\tests\test_bkt.py", line 25, in fit
+    return fit_weber_minnhagen(self.temperatures, self.sizes,
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\jinhao\Desktop\Projects\GPU-monte-carlo\utils\Analysis\bkt.py", line 42, in fit_weber_minnhagen
+    fit = least_squares(lambda p: residual((t, p[0])), [max(a, 1e-4)],
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\jinhao\AppData\Local\Programs\Python\Python312\Lib\site-packages\scipy\_lib\_util.py", line 662, in inner
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\jinhao\AppData\Local\Programs\Python\Python312\Lib\site-packages\scipy\optimize\_lsq\least_squares.py", line 946, in least_squares
+    raise ValueError("Residuals are not finite in the initial point.")
+ValueError: Residuals are not finite in the initial point.
+
+======================================================================
+ERROR: test_binder_normalization_and_existing_ising_observables (test_ising_analysis.IsingAnalysisTests.test_binder_normalization_and_existing_ising_observables)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\jinhao\Desktop\Projects\GPU-monte-carlo\tests\test_ising_analysis.py", line 26, in test_binder_normalization_and_existing_ising_observables
+    analysis = IsingAnalysis(runs)
+               ^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\jinhao\Desktop\Projects\GPU-monte-carlo\models\ising\analysis.py", line 45, in __init__
+    raise ValueError(f"L={L}: need at least two complete time blocks")
+ValueError: L=8: need at least two complete time blocks
+
+======================================================================
+ERROR: test_both_models_run_analyze_and_plot_multiple_sizes (test_simulation.SimulationTests.test_both_models_run_analyze_and_plot_multiple_sizes) (model='IsingModel')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\jinhao\Desktop\Projects\GPU-monte-carlo\tests\test_simulation.py", line 169, in test_both_models_run_analyze_and_plot_multiple_sizes
+    if model_type is XYModel else analysis_type(runs)
+                                  ^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\jinhao\Desktop\Projects\GPU-monte-carlo\models\ising\analysis.py", line 45, in __init__
+    raise ValueError(f"L={L}: need at least two complete time blocks")
+ValueError: L=4: need at least two complete time blocks
+
+======================================================================
+ERROR: test_all_size_pairs_and_minimum_size_fits (test_xy_analysis.XYAnalysisTests.test_all_size_pairs_and_minimum_size_fits)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\jinhao\Desktop\Projects\GPU-monte-carlo\tests\test_xy_analysis.py", line 84, in test_all_size_pairs_and_minimum_size_fits
+    analysis = self.analysis()
+               ^^^^^^^^^^^^^^^
+  File "C:\Users\jinhao\Desktop\Projects\GPU-monte-carlo\tests\test_xy_analysis.py", line 56, in analysis
+    return XYAnalysis(synthetic_runs() if runs is None else runs,
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: XYAnalysis.__init__() got an unexpected keyword argument 'n_resamples'
+
+======================================================================
+ERROR: test_existing_observables_and_corrected_errors_are_preserved (test_xy_analysis.XYAnalysisTests.test_existing_observables_and_corrected_errors_are_preserved)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\jinhao\Desktop\Projects\GPU-monte-carlo\tests\test_xy_analysis.py", line 61, in test_existing_observables_and_corrected_errors_are_preserved
+    analysis = self.analysis(runs)
+               ^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\jinhao\Desktop\Projects\GPU-monte-carlo\tests\test_xy_analysis.py", line 56, in analysis
+    return XYAnalysis(synthetic_runs() if runs is None else runs,
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: XYAnalysis.__init__() got an unexpected keyword argument 'n_resamples'
+
+======================================================================
+ERROR: test_existing_raw_plot_keeps_observables_and_error_bars (test_xy_analysis.XYAnalysisTests.test_existing_raw_plot_keeps_observables_and_error_bars)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\jinhao\Desktop\Projects\GPU-monte-carlo\tests\test_xy_analysis.py", line 128, in test_existing_raw_plot_keeps_observables_and_error_bars
+    analysis = self.analysis(synthetic_runs(sizes=(16, 24)))
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\jinhao\Desktop\Projects\GPU-monte-carlo\tests\test_xy_analysis.py", line 56, in analysis
+    return XYAnalysis(synthetic_runs() if runs is None else runs,
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: XYAnalysis.__init__() got an unexpected keyword argument 'n_resamples'
+
+======================================================================
+ERROR: test_joint_crossing_errors_and_ambiguous_curves (test_xy_analysis.XYAnalysisTests.test_joint_crossing_errors_and_ambiguous_curves)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\jinhao\Desktop\Projects\GPU-monte-carlo\tests\test_xy_analysis.py", line 101, in test_joint_crossing_errors_and_ambiguous_curves
+    analysis = self.analysis(synthetic_runs(sizes=(16, 24)))
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\jinhao\Desktop\Projects\GPU-monte-carlo\tests\test_xy_analysis.py", line 56, in analysis
+    return XYAnalysis(synthetic_runs() if runs is None else runs,
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: XYAnalysis.__init__() got an unexpected keyword argument 'n_resamples'
+
+======================================================================
+ERROR: test_reproducibility_json_and_input_immutability (test_xy_analysis.XYAnalysisTests.test_reproducibility_json_and_input_immutability)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\jinhao\Desktop\Projects\GPU-monte-carlo\tests\test_xy_analysis.py", line 117, in test_reproducibility_json_and_input_immutability
+    first, second = self.analysis(runs), self.analysis(runs)
+                    ^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\jinhao\Desktop\Projects\GPU-monte-carlo\tests\test_xy_analysis.py", line 56, in analysis
+    return XYAnalysis(synthetic_runs() if runs is None else runs,
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: XYAnalysis.__init__() got an unexpected keyword argument 'n_resamples'
+
+======================================================================
+ERROR: test_singular_bootstrap_moments_remain_explicitly_undefined (test_xy_analysis.XYAnalysisTests.test_singular_bootstrap_moments_remain_explicitly_undefined)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\jinhao\Desktop\Projects\GPU-monte-carlo\tests\test_xy_analysis.py", line 191, in test_singular_bootstrap_moments_remain_explicitly_undefined
+    analysis = XYAnalysis(runs, block_size=20, n_resamples=100)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: XYAnalysis.__init__() got an unexpected keyword argument 'n_resamples'
+
+======================================================================
+ERROR: test_size_cut_and_temperature_window (test_xy_analysis.XYAnalysisTests.test_size_cut_and_temperature_window)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\jinhao\Desktop\Projects\GPU-monte-carlo\tests\test_xy_analysis.py", line 144, in test_size_cut_and_temperature_window
+    analysis = self.analysis(min_size=24, temperature_range=(0.88, 0.95))
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\jinhao\Desktop\Projects\GPU-monte-carlo\tests\test_xy_analysis.py", line 56, in analysis
+    return XYAnalysis(synthetic_runs() if runs is None else runs,
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: XYAnalysis.__init__() got an unexpected keyword argument 'n_resamples'
+
+======================================================================
+ERROR: test_wm_plot_rescales_values_and_errors_with_one_shared_constant (test_xy_analysis.XYAnalysisTests.test_wm_plot_rescales_values_and_errors_with_one_shared_constant)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\jinhao\Desktop\Projects\GPU-monte-carlo\tests\test_xy_analysis.py", line 151, in test_wm_plot_rescales_values_and_errors_with_one_shared_constant
+    analysis = self.analysis(min_size=24)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\jinhao\Desktop\Projects\GPU-monte-carlo\tests\test_xy_analysis.py", line 56, in analysis
+    return XYAnalysis(synthetic_runs() if runs is None else runs,
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: XYAnalysis.__init__() got an unexpected keyword argument 'n_resamples'
+
+======================================================================
+ERROR: test_zero_uncertainty_cannot_be_used_as_a_weight (test_xy_analysis.XYAnalysisTests.test_zero_uncertainty_cannot_be_used_as_a_weight)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\jinhao\Desktop\Projects\GPU-monte-carlo\tests\test_xy_analysis.py", line 178, in test_zero_uncertainty_cannot_be_used_as_a_weight
+    analysis = self.analysis()
+               ^^^^^^^^^^^^^^^
+  File "C:\Users\jinhao\Desktop\Projects\GPU-monte-carlo\tests\test_xy_analysis.py", line 56, in analysis
+    return XYAnalysis(synthetic_runs() if runs is None else runs,
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: XYAnalysis.__init__() got an unexpected keyword argument 'n_resamples'
+
+======================================================================
+FAIL: test_two_blocks_are_the_minimum_for_an_error (test_analysis_statistics.ErrorEstimateTests.test_two_blocks_are_the_minimum_for_an_error)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\jinhao\Desktop\Projects\GPU-monte-carlo\tests\test_analysis_statistics.py", line 105, in test_two_blocks_are_the_minimum_for_an_error
+    with self.assertRaises(ValueError):
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: ValueError not raised
+
+======================================================================
+FAIL: test_flat_temperature_profile_is_explicit (test_bkt.WeberMinnhagenTests.test_flat_temperature_profile_is_explicit)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\jinhao\Desktop\Projects\GPU-monte-carlo\tests\test_bkt.py", line 108, in test_flat_temperature_profile_is_explicit
+    self.assertIn("flat", self.fit()["reason"])
+AssertionError: 'flat' not found in 'boundary optimum'
+
+======================================================================
+FAIL: test_flat_interval_and_undefined_curve_have_no_unique_root (test_crossings.CrossingTests.test_flat_interval_and_undefined_curve_have_no_unique_root)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\jinhao\Desktop\Projects\GPU-monte-carlo\tests\test_crossings.py", line 27, in test_flat_interval_and_undefined_curve_have_no_unique_root
+    self.assertEqual(linear_crossings([0, 1, 2], [0, 0, 1],
+AssertionError: Lists differ: [nan] != []
+
+First list contains 1 additional elements.
+First extra element 0:
+nan
+
+- [nan]
++ []
+
+======================================================================
+FAIL: test_plot_and_report_preserve_inputs_and_counter_scope (test_pt_analysis.PTAnalysisTests.test_plot_and_report_preserve_inputs_and_counter_scope)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\jinhao\Desktop\Projects\GPU-monte-carlo\tests\test_pt_analysis.py", line 76, in test_plot_and_report_preserve_inputs_and_counter_scope
+    self.assertIn("including thermalization", analysis.format_summary())
+AssertionError: 'including thermalization' not found in 'Parallel tempering diagnostics (includes thermalization)\nL=16: 50/100 accepted, 3 trips, mean 333.3333333333333 sweeps/trip'
+
+----------------------------------------------------------------------
+Ran 82 tests in 10.328s
+
+FAILED (failures=4, errors=16)

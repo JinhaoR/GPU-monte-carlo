@@ -1,0 +1,80 @@
+{
+  "device": "NVIDIA GeForce RTX 4070 SUPER",
+  "arguments": {
+    "sizes": [
+      32
+    ],
+    "replicas": 100,
+    "threads": 16,
+    "warmup": 1000,
+    "sweeps": 2000,
+    "repeats": 1,
+    "modes": [
+      "production"
+    ],
+    "cuda_profile_api": true,
+    "output": "profiling\\results\\he3_nsys_L32_timing.json",
+    "dump_ptx": null
+  },
+  "cases": [
+    {
+      "L": 32,
+      "replicas": 100,
+      "mode": "production",
+      "threads": 16,
+      "iterations": 2000,
+      "seconds": [
+        0.40877499999987776
+      ],
+      "median_seconds": 0.40877499999987776,
+      "median_ms_per_iteration": 0.20438749999993888,
+      "setup_and_warmup_seconds": 2.5563455000010435,
+      "site_proposals_per_second": 501009112.5926518,
+      "sweeps_per_second": 4892.667115162615
+    }
+  ],
+  "kernel_resources": {
+    "metropolis_color": {
+      "registers_per_thread": {
+        "(Array(complex64, 5, 'C', False, aligned=True), Array(Record([('s0', {'type': uint64, 'offset': 0, 'alignment': None, 'title': None, }), ('s1', {'type': uint64, 'offset': 8, 'alignment': None, 'title': None, })], 16, True), 1, 'C', False, aligned=True), Array(float32, 1, 'C', False, aligned=True), int64, UniTuple(float32, 5), float32, float32)": 71
+      },
+      "local_bytes_per_thread": {
+        "(Array(complex64, 5, 'C', False, aligned=True), Array(Record([('s0', {'type': uint64, 'offset': 0, 'alignment': None, 'title': None, }), ('s1', {'type': uint64, 'offset': 8, 'alignment': None, 'title': None, })], 16, True), 1, 'C', False, aligned=True), Array(float32, 1, 'C', False, aligned=True), int64, UniTuple(float32, 5), float32, float32)": 0
+      },
+      "shared_bytes_per_block": {
+        "(Array(complex64, 5, 'C', False, aligned=True), Array(Record([('s0', {'type': uint64, 'offset': 0, 'alignment': None, 'title': None, }), ('s1', {'type': uint64, 'offset': 8, 'alignment': None, 'title': None, })], 16, True), 1, 'C', False, aligned=True), Array(float32, 1, 'C', False, aligned=True), int64, UniTuple(float32, 5), float32, float32)": 0
+      },
+      "max_threads_per_block": {
+        "(Array(complex64, 5, 'C', False, aligned=True), Array(Record([('s0', {'type': uint64, 'offset': 0, 'alignment': None, 'title': None, }), ('s1', {'type': uint64, 'offset': 8, 'alignment': None, 'title': None, })], 16, True), 1, 'C', False, aligned=True), Array(float32, 1, 'C', False, aligned=True), int64, UniTuple(float32, 5), float32, float32)": 896
+      }
+    },
+    "he3_energy_kernel": {
+      "registers_per_thread": {
+        "(Array(complex64, 5, 'C', False, aligned=True), Array(float64, 1, 'C', False, aligned=True), UniTuple(float32, 5), float32)": 72
+      },
+      "local_bytes_per_thread": {
+        "(Array(complex64, 5, 'C', False, aligned=True), Array(float64, 1, 'C', False, aligned=True), UniTuple(float32, 5), float32)": 0
+      },
+      "shared_bytes_per_block": {
+        "(Array(complex64, 5, 'C', False, aligned=True), Array(float64, 1, 'C', False, aligned=True), UniTuple(float32, 5), float32)": 2048
+      },
+      "max_threads_per_block": {
+        "(Array(complex64, 5, 'C', False, aligned=True), Array(float64, 1, 'C', False, aligned=True), UniTuple(float32, 5), float32)": 896
+      }
+    },
+    "he3_ordered_measure_kernel": {
+      "registers_per_thread": {
+        "(Array(complex64, 5, 'C', False, aligned=True), Array(float64, 2, 'C', False, aligned=True), UniTuple(float32, 5), float32, Array(int32, 1, 'C', False, aligned=True))": 156
+      },
+      "local_bytes_per_thread": {
+        "(Array(complex64, 5, 'C', False, aligned=True), Array(float64, 2, 'C', False, aligned=True), UniTuple(float32, 5), float32, Array(int32, 1, 'C', False, aligned=True))": 0
+      },
+      "shared_bytes_per_block": {
+        "(Array(complex64, 5, 'C', False, aligned=True), Array(float64, 2, 'C', False, aligned=True), UniTuple(float32, 5), float32, Array(int32, 1, 'C', False, aligned=True))": 18432
+      },
+      "max_threads_per_block": {
+        "(Array(complex64, 5, 'C', False, aligned=True), Array(float64, 2, 'C', False, aligned=True), UniTuple(float32, 5), float32, Array(int32, 1, 'C', False, aligned=True))": 384
+      }
+    }
+  }
+}

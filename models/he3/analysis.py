@@ -6,6 +6,8 @@ import numpy as np
 from utils.Analysis.statistics import blocked_jackknife
 from utils.data_io import load_runs
 
+from utils.Analysis.bkt import fit_weber_minnhagen
+
 
 OBSERVABLES = (
     "energy", "density", "chirality", "phase", "binder_chirality", "binder_phase",
@@ -34,6 +36,57 @@ class He3Analysis:
             hx, hy, 0.5 * (hx + hy),
         ))
 
+
+    def fit_wm(self, temperature_range=None, q=0.5):
+        """Weber–Minnhagen fit for vortex charge q."""
+
+        if not np.isfinite(q) or q <= 0:
+            raise ValueError("Vortex charge q must be positive and finite")
+
+        T = self.temperatures
+        L = np.asarray(self.sizes)
+
+        helicity = np.stack([
+            self.results[l]["helicity"] for l in L
+        ])
+        errors = np.stack([
+            self.results[l]["helicity_err"] for l in L
+        ])
+
+        valid = np.all(
+            np.isfinite(helicity)
+            & np.isfinite(errors)
+            & (errors > 0),
+            axis=0
+        )
+        valid &= np.isfinite(T) & (T > 0)
+
+        if temperature_range is not None:
+            low, high = temperature_range
+            valid &= (T >= low) & (T <= high)
+
+        if len(L) < 3 or np.count_nonzero(valid) < 2:
+            raise ValueError("Insufficient data for Weber–Minnhagen fit")
+
+        # Transform the charge-q jump to the ordinary 2T/pi form.
+        factor = q**2
+
+        fit = fit_weber_minnhagen(
+            T[valid],
+            L,
+            factor * helicity[:, valid],
+            factor * errors[:, valid],
+            profile=False
+        )
+
+        if fit["temperature"] is None or fit["C"] is None:
+            raise ValueError(f"WM fit failed: {fit['reason']}")
+
+        fit["q"] = q
+
+        return fit
+
+
     def compute(self):
         results = {}
         for L in self.sizes:
@@ -56,18 +109,103 @@ class He3Analysis:
                           for key, array in ((name, value), (name + "_err", error))}
         return results
 
-    def plot(self, show=True):
-        fig, axes = plt.subplots(2, 2, figsize=(11, 8))
-        labels = ("binder_chirality", "binder_phase", "helicity", "density")
-        for ax, name in zip(axes.flat, labels):
-            for L in self.sizes:
-                r = self.results[L]
-                ax.errorbar(self.temperatures, r[name], yerr=r[name + "_err"], fmt=".-", label=f"L={L}")
-            ax.set(xlabel="Temperature", ylabel=name.replace("_", " "))
-            ax.grid(alpha=0.3)
-            ax.legend()
-        fig.suptitle("Full thin-film helium-3 model")
-        fig.tight_layout()
+
+    def plot(self, C=None, q=0.5, show=True):
+        T = self.temperatures
+
+        observables = {
+            "binder_chirality": (
+                "Chirality Binder cumulant",
+                r"$U_\chi$",
+            ),
+            "binder_phase": (
+                "Composite phase Binder cumulant",
+                r"$U_{\Phi_2}$",
+            ),
+            "helicity": (
+                "WM-corrected helicity" if C is not None else "Helicity modulus",
+                r"$\widetilde{\Upsilon}_L$" if C is not None else r"$\Upsilon_L$",
+            ),
+            "density": (
+                "Density",
+                r"$n$",
+            ),
+        }
+
+        colors = [
+            "#4C78A8",
+            "#F58518",
+            "#54A24B",
+            "#E45756",
+            "#B279A2",
+        ]
+
+        figures = {}
+        errorevery = max(1, len(T) // 20)
+
+        for name, (title, ylabel) in observables.items():
+            fig, ax = plt.subplots(figsize=(7, 5))
+
+            for index, L in enumerate(self.sizes):
+                result = self.results[L]
+                color = colors[index % len(colors)]
+
+                y = result[name]
+                yerr = result[name + "_err"]
+
+                if name == "helicity" and C is not None:
+                    denominator = 2 * np.log(L) + C
+                    if denominator <= 0 or not np.isfinite(denominator):
+                        raise ValueError(
+                            f"Invalid WM correction: L={L}, C={C}"
+                        )
+
+                    factor = 1 + 1 / denominator
+                    y = y / factor
+                    yerr = yerr / factor
+
+                # Continuous line without markers
+                ax.plot(
+                    T, y,
+                    color=color,
+                    linewidth=1.8,
+                    label=f"L={L}",
+                )
+
+                ax.errorbar(
+                    T, y,
+                    yerr=yerr,
+                    fmt="none",
+                    ecolor=color,
+                    elinewidth=1.4,
+                    capsize=0,
+                    alpha=0.9,
+                    errorevery=1,
+                )
+
+            if name == "helicity":
+                ax.plot(
+                    T,
+                    2 * T / (np.pi * q**2),
+                    "k--",
+                    linewidth=1.3,
+                    label=rf"$2T/(\pi q^2),\ q={q:g}$",
+                )
+
+            ax.set(
+                title=title,
+                xlabel="Temperature",
+                ylabel=ylabel,
+            )
+            ax.grid(alpha=0.2)
+            ax.legend(frameon=False)
+            fig.tight_layout()
+
+            figures[name] = fig
+
         if show:
             plt.show()
-        return fig
+
+        return figures
+
+

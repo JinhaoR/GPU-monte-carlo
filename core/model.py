@@ -44,6 +44,19 @@ class Model(ABC):
             "This model does not provide GPU total-energy measurements"
         )
 
+    def measure_with_energy(self, state, energies, temperature_indices=None):
+        """Measure observables using fresh walker-ordered GPU energies.
+
+        energies is a read-only float64 GPU array of total energies, shape (R,).
+        Output ordering follows temperature_indices, as in measure().
+        Models may override this to skip recalculating total energy.
+        The default ignores the cache and preserves existing behavior.
+        """
+        return self.measure(
+            state,
+            temperature_indices=temperature_indices,
+        )
+
     def parameters(self) -> dict:
         """Physical parameters to include in run metadata."""
         return {}

@@ -65,27 +65,135 @@ def local_energy(state, r, i, j, psi, betas, K):
                       x - down_x, y - down_y)
     return potential(psi, betas) + K * g
 
+@cuda.jit(device=True)
+def gradient_difference(state, r, i, j, proposed):
+    """Exact change in the three affected gradient cells."""
+    L = state.shape[1]
+    ip, im = (i + 1) % L, (i - 1) % L
+    jp, jm = (j + 1) % L, (j - 1) % L
+
+    delta_g = float32(0)
+
+    for mu in range(3):
+        # Original fields, still stored in state.
+        x = state[r, i, j, mu, 0]
+        y = state[r, i, j, mu, 1]
+
+        # Actual rounded increments, not nominal RNG increments.
+        ex = proposed[mu, 0] - x
+        ey = proposed[mu, 1] - y
+
+        # Six neighboring sites.
+        rx = state[r, ip, j, mu, 0]
+        ry = state[r, ip, j, mu, 1]
+
+        ux = state[r, i, jp, mu, 0]
+        uy = state[r, i, jp, mu, 1]
+
+        lx = state[r, im, j, mu, 0]
+        ly = state[r, im, j, mu, 1]
+
+        dx = state[r, i, jm, mu, 0]
+        dy = state[r, i, jm, mu, 1]
+
+        lux = state[r, im, jp, mu, 0]
+        luy = state[r, im, jp, mu, 1]
+
+        drx = state[r, ip, jm, mu, 0]
+        dry = state[r, ip, jm, mu, 1]
+
+        # Forward differences in the center cell.
+        a = rx - x
+        b = ry - y
+        c = ux - x
+        d = uy - y
+
+        # Forward differences in the left cell.
+        al = x - lx
+        bl = y - ly
+        cl = lux - lx
+        dl = luy - ly
+
+        # Forward differences in the down cell.
+        ad = drx - dx
+        bd = dry - dy
+        cd = x - dx
+        dd = y - dy
+
+        # Linear coefficients of the local gradient energy.
+        fx = (
+            -(float32(3) * a + b + c + d)
+            + (float32(3) * al + dl)
+            + (cd + bd)
+        )
+
+        fy = (
+            -(a + b + c + float32(3) * d)
+            + (bl + cl)
+            + (float32(3) * dd + ad)
+        )
+
+        # Exact quadratic change.
+        linear = float32(2) * (
+            ex.conjugate() * fx + ey.conjugate() * fy
+        ).real
+
+        quadratic = (
+            float32(8) * (norm2(ex) + norm2(ey))
+            + float32(4) * (ex.conjugate() * ey).real
+        )
+
+        delta_g += linear + quadratic
+
+    return delta_g
+
 
 @cuda.jit
 def metropolis_color(state, rng_states, inverse_temperatures, color, betas, K, delta):
     col, row, r = cuda.grid(3)
     L = state.shape[1]
-    i, j = 2 * row + color // 2, 2 * col + color % 2
+
+    i = 2 * row + color // 2
+    j = 2 * col + color % 2
+
     if r < state.shape[0] and i < L and j < L:
         index = r * L * L + i * L + j
+
         psi = cuda.local.array((3, 2), dtype=complex64)
+
         for mu in range(3):
             for a in range(2):
                 psi[mu, a] = state[r, i, j, mu, a]
-        old_energy = local_energy(state, r, i, j, psi, betas, K)
-        # A symmetric box proposal in all twelve Cartesian coordinates.
+
+        # Only calculate the original onsite potential.
+        old_potential = potential(psi, betas)
+
+        # Same symmetric Cartesian proposal as before.
         for mu in range(3):
             for a in range(2):
-                re = delta * (float32(2) * xoroshiro128p_uniform_float32(rng_states, index) - float32(1))
-                im = delta * (float32(2) * xoroshiro128p_uniform_float32(rng_states, index) - float32(1))
-                psi[mu, a] = complex64(complex(psi[mu, a].real + re, psi[mu, a].imag + im))
-        difference = local_energy(state, r, i, j, psi, betas, K) - old_energy
+                re = delta * (
+                    float32(2) * xoroshiro128p_uniform_float32(rng_states, index)
+                    - float32(1)
+                )
+                im = delta * (
+                    float32(2) * xoroshiro128p_uniform_float32(rng_states, index)
+                    - float32(1)
+                )
+
+                psi[mu, a] = complex64(complex(
+                    psi[mu, a].real + re,
+                    psi[mu, a].imag + im,
+                ))
+
+        # Calculate the energy difference directly.
+        delta_potential = potential(psi, betas) - old_potential
+        delta_gradient = gradient_difference(state, r, i, j, psi)
+
+        difference = delta_potential + K * delta_gradient
+
+        # Unchanged Metropolis acceptance.
         u = xoroshiro128p_uniform_float32(rng_states, index)
+
         if difference <= 0 or u < math.exp(-inverse_temperatures[r] * difference):
             for mu in range(3):
                 for a in range(2):

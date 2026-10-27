@@ -67,7 +67,27 @@ class Runtime:
             self.R
         )
 
+        # GPU energy cache, associated with the current physical state.
+        self._configuration_version = 0
+        self._energy_version = -1
+        self._cached_energies = None
+
+    def invalidate_energy_cache(self):
+        """Invalidate energies before changing fields or Hamiltonian parameters.
+
+        sweep() does this automatically. Call explicitly before restoring or
+        directly modifying state, or changing model parameters. Temperature
+        exchanges do not change the physical energy and need no invalidation.
+        """
+        self._configuration_version += 1
+        self._energy_version = -1
+        self._cached_energies = None
+
+
     def sweep(self):
+        # Invalidate before launching potentially asynchronous GPU updates.
+        self.invalidate_energy_cache()
+
         for color in range(4):
             self.model.update_color(
                 self.state,
@@ -79,16 +99,37 @@ class Runtime:
             )
 
     def measure(self, temperature_indices=None):
-        """Return CPU measurements, optionally ordered by GPU temperature indices."""
-        if temperature_indices is None:
-            return self.model.measure(self.state)
+        """Return CPU observables, optionally ordered by temperature."""
+
+        cache_valid = (
+            self._cached_energies is not None
+            and self._energy_version == self._configuration_version
+        )
+
+        if cache_valid:
+            return self.model.measure_with_energy(
+                self.state,
+                self._cached_energies,
+                temperature_indices=temperature_indices,
+            )
+
         return self.model.measure(
-            self.state, temperature_indices=temperature_indices
+            self.state,
+            temperature_indices=temperature_indices,
         )
 
     def measure_energy(self, output):
-        """Write current total energies to a float64 GPU array in walker order."""
-        return self.model.measure_energy(self.state, output)
+        """Calculate total energies in physical walker order."""
+        # A failed producer may partially overwrite the previously cached buffer.
+        self._cached_energies = None
+        self._energy_version = -1
+        result = self.model.measure_energy(self.state, output)
+
+        # Retain the caller-owned GPU buffer, not a CPU copy.
+        self._cached_energies = output
+        self._energy_version = self._configuration_version
+
+        return result
 
     def snapshot(self):
         return self.state.copy_to_host()

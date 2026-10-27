@@ -1,0 +1,48 @@
+{
+  "date": "2026-10-27",
+  "device": "NVIDIA GeForce RTX 4070 SUPER",
+  "matched_cases": [
+    {
+      "L": 32,
+      "old_ms": 0.20521599999968507,
+      "new_ms": 0.1996534000002915,
+      "throughput_ratio": 1.0278612836014085,
+      "elapsed_reduction_percent": 2.7106073597585545
+    },
+    {
+      "L": 48,
+      "old_ms": 0.22985476666629742,
+      "new_ms": 0.18381383333326085,
+      "throughput_ratio": 1.2504758891000483,
+      "elapsed_reduction_percent": 20.030445311529554
+    },
+    {
+      "L": 64,
+      "old_ms": 0.3739441333333768,
+      "new_ms": 0.240163066666355,
+      "throughput_ratio": 1.5570426315919603,
+      "elapsed_reduction_percent": 35.77568271348008
+    },
+    {
+      "L": 80,
+      "old_ms": 0.5240546666670222,
+      "new_ms": 0.3172478333338707,
+      "throughput_ratio": 1.6518778431356804,
+      "elapsed_reduction_percent": 39.46283593817398
+    }
+  ],
+  "long_warmup_L64": {
+    "old_ms": 0.33649906666687457,
+    "new_ms": 0.20715406666689282
+  },
+  "same_session_L64": {
+    "old_median_ms": 0.3509179166667309,
+    "new_median_ms": 0.2114774333337361,
+    "speedup": 1.6593634182846424
+  },
+  "projected_loop_seconds": {
+    "previous_matched": 762.4030766664267,
+    "updated_matched": 544.8423100002401,
+    "updated_current_ladder": 552.6370433333796
+  }
+}

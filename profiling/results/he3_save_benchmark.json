@@ -1,0 +1,7 @@
+{
+  "L": 64,
+  "raw_sample_bytes": 360000000,
+  "npz_bytes": 337894353,
+  "save_seconds": 11.666222699997888,
+  "includes": "manifest preparation, np.savez_compressed and file writes; original data untouched"
+}

@@ -1,76 +1,99 @@
+"""2D Ising observables with block-jackknife errors."""
+
 import numpy as np
 import matplotlib.pyplot as plt
 
-from utils.Analysis.binder import binder_cumulant
+from utils.Analysis.statistics import block_means, jackknife_from_blocks
+from utils.data_io import load_runs
+
 
 class IsingAnalysis:
 
-    def __init__(self, runs):
-        """runs maps each lattice size L to a Simulation.run() result."""
-        if len(runs) < 2:
-            raise ValueError("At least two lattice sizes required")
+    @classmethod
+    def from_file(cls, path, block_size=200):
+        return cls(load_runs(path), block_size=block_size)
 
-        self.runs = runs
+    def __init__(self, runs, block_size=200):
         self.sizes = sorted(runs)
 
-        first = runs[self.sizes[0]]["metadata"]
+        metadata = runs[self.sizes[0]]["metadata"]
+        self.temperatures = np.asarray(metadata["temperatures"], dtype=float)
+        self.J = float(metadata["model_parameters"]["J"])
 
-        self.temperatures = np.asarray(
-            first["temperatures"], dtype=np.float64
-        )
-        self.J = first["model_parameters"]["J"]
-
-        for L, run in runs.items():
-            metadata = run["metadata"]
-
-            if metadata["L"] != L:
-                raise ValueError(f"L mismatch for {L}")
-
-            if not np.array_equal(
-                metadata["temperatures"], self.temperatures
-            ):
-                raise ValueError("All sizes must use the same temperatures")
-
-            if metadata["model_parameters"]["J"] != self.J:
-                raise ValueError("All sizes must use the same J")
-
-        self.results = self.compute()
-
-    def compute(self):
-        results = {}
-        T = self.temperatures
+        self.results = {}
 
         for L in self.sizes:
-            samples = self.runs[L]["samples"]
+            samples = runs[L]["samples"]
             N = L**2
+            T = self.temperatures
 
-            E = np.asarray(samples["energy"], dtype=np.float64)
-            M = np.asarray(samples["magnetization"], dtype=np.float64)
+            E = np.asarray(samples["energy"], dtype=float)
+            M = np.asarray(samples["magnetization"], dtype=float)
 
-            mean_E = np.mean(E, axis=0)
-            mean_E2 = np.mean(E**2, axis=0)
-
-            mean_M = np.mean(M, axis=0)
-            mean_abs_M = np.mean(np.abs(M), axis=0)
-            mean_M2 = np.mean(M**2, axis=0)
-
-            results[L] = {
-                "energy": mean_E / N,
-                "magnetization": mean_abs_M / N,
-                "heat_capacity": (
-                    (mean_E2 - mean_E**2) / (N * T**2)
-                ),
-                "susceptibility": (
-                    (mean_M2 - mean_M**2) / (N * T)
-                ),
-                "binder": binder_cumulant(
-                    M**2, gaussian_factor=3.0
-                ),
+            # Moments for thermodynamic observables
+            moments = {
+                "E": E,
+                "E2": E**2,
+                "M": M,
+                "absM": np.abs(M),
+                "M2": M**2,
+                "M4": M**4,
             }
 
-        return results
+            # Time blocking
+            if len(E) < 2 * block_size:
+                raise ValueError(f"L={L}: need at least two complete time blocks")
 
-    def plot(self):
+            blocks = {
+                name: block_means(x, block_size)
+                for name, x in moments.items()
+            }
+
+            # Calculate observables from averaged moments
+            def estimate(mean):
+                energy = mean["E"] / N
+
+                magnetization = mean["absM"] / N
+
+                heat_capacity = (
+                    mean["E2"] - mean["E"]**2
+                ) / (N * T**2)
+
+                susceptibility = (
+                    mean["M2"] - mean["M"]**2
+                ) / (N * T)
+
+                binder = 1 - mean["M4"] / (3 * mean["M2"]**2)
+
+                return np.stack((
+                    energy,
+                    magnetization,
+                    heat_capacity,
+                    susceptibility,
+                    binder,
+                ))
+
+            # Block jackknife
+            values, errors = jackknife_from_blocks(blocks, estimate)
+
+            names = (
+                "energy",
+                "magnetization",
+                "heat_capacity",
+                "susceptibility",
+                "binder",
+            )
+
+            self.results[L] = {}
+
+            for name, value, error in zip(names, values, errors):
+                self.results[L][name] = value
+                self.results[L][name + "_err"] = error
+
+    def plot(self, show=True):
+        T = self.temperatures
+
+        # Exact Tc for the zero-field nearest-neighbor square-lattice Ising model
         Tc = 2 * self.J / np.log(1 + np.sqrt(2))
 
         labels = {
@@ -81,21 +104,31 @@ class IsingAnalysis:
             "binder": "Binder cumulant",
         }
 
-        fig, axes = plt.subplots(2, 3, figsize=(13, 8))
+        fig, axes = plt.subplots(2, 3, figsize=(15, 8))
 
-        for ax, (name, label) in zip(
-            axes.flat, labels.items()
-        ):
+        for ax, (name, label) in zip(axes.flat, labels.items()):
             for L in self.sizes:
-                ax.plot(
-                    self.temperatures, self.results[L][name],
-                    "o-", label=f"L={L}"
+                result = self.results[L]
+
+                ax.errorbar(
+                    T,
+                    result[name],
+                    yerr=result[name + "_err"],
+                    fmt=".-",
+                    capsize=2,
+                    label=f"L={L}",
                 )
 
-            ax.axvline(Tc, linestyle="--", color="gray")
+            ax.axvline(
+                Tc,
+                color="gray",
+                linestyle="--",
+                label=rf"$T_c={Tc:.4f}$",
+            )
 
             ax.set_xlabel("Temperature")
             ax.set_ylabel(label)
+            ax.set_title(label)
             ax.grid(alpha=0.3)
             ax.legend()
 
@@ -104,4 +137,7 @@ class IsingAnalysis:
         fig.suptitle("2D Ising model")
         fig.tight_layout()
 
-        plt.show()
+        if show:
+            plt.show()
+
+        return fig

@@ -1,0 +1,120 @@
+{
+  "tests_run": 82,
+  "failures": 4,
+  "errors": 16,
+  "skipped": 0,
+  "remaining_failures": [
+    {
+      "test": "test_two_blocks_are_the_minimum_for_an_error (test_analysis_statistics.ErrorEstimateTests.test_two_blocks_are_the_minimum_for_an_error)",
+      "last_line": "AssertionError: ValueError not raised"
+    },
+    {
+      "test": "test_flat_temperature_profile_is_explicit (test_bkt.WeberMinnhagenTests.test_flat_temperature_profile_is_explicit)",
+      "last_line": "AssertionError: 'flat' not found in 'boundary optimum'"
+    },
+    {
+      "test": "test_flat_interval_and_undefined_curve_have_no_unique_root (test_crossings.CrossingTests.test_flat_interval_and_undefined_curve_have_no_unique_root)",
+      "last_line": "+ []"
+    },
+    {
+      "test": "test_plot_and_report_preserve_inputs_and_counter_scope (test_pt_analysis.PTAnalysisTests.test_plot_and_report_preserve_inputs_and_counter_scope)",
+      "last_line": "AssertionError: 'including thermalization' not found in 'Parallel tempering diagnostics (includes thermalization)\\nL=16: 50/100 accepted, 3 trips, mean 333.3333333333333 sweeps/trip'"
+    },
+    {
+      "test": "test_analyze_cli (unittest.loader._FailedTest.test_analyze_cli)",
+      "last_line": "ModuleNotFoundError: No module named 'analyze'"
+    },
+    {
+      "test": "test_insufficient_size_or_temperature_data (test_bkt.WeberMinnhagenTests.test_insufficient_size_or_temperature_data)",
+      "last_line": "TypeError: fit_weber_minnhagen() got an unexpected keyword argument 'min_size'"
+    },
+    {
+      "test": "test_size_cut_and_unsorted_inputs (test_bkt.WeberMinnhagenTests.test_size_cut_and_unsorted_inputs)",
+      "last_line": "TypeError: fit_weber_minnhagen() got an unexpected keyword argument 'min_size'"
+    },
+    {
+      "test": "test_vanishing_correction_is_not_a_finite_C (test_bkt.WeberMinnhagenTests.test_vanishing_correction_is_not_a_finite_C)",
+      "last_line": "TypeError: argument of type 'NoneType' is not iterable"
+    },
+    {
+      "test": "test_zero_error_is_not_a_valid_weight (test_bkt.WeberMinnhagenTests.test_zero_error_is_not_a_valid_weight)",
+      "last_line": "ValueError: Residuals are not finite in the initial point."
+    },
+    {
+      "test": "test_binder_normalization_and_existing_ising_observables (test_ising_analysis.IsingAnalysisTests.test_binder_normalization_and_existing_ising_observables)",
+      "last_line": "ValueError: L=8: need at least two complete time blocks"
+    },
+    {
+      "test": "test_both_models_run_analyze_and_plot_multiple_sizes (test_simulation.SimulationTests.test_both_models_run_analyze_and_plot_multiple_sizes) (model='IsingModel')",
+      "last_line": "ValueError: L=4: need at least two complete time blocks"
+    },
+    {
+      "test": "test_all_size_pairs_and_minimum_size_fits (test_xy_analysis.XYAnalysisTests.test_all_size_pairs_and_minimum_size_fits)",
+      "last_line": "TypeError: XYAnalysis.__init__() got an unexpected keyword argument 'n_resamples'"
+    },
+    {
+      "test": "test_existing_observables_and_corrected_errors_are_preserved (test_xy_analysis.XYAnalysisTests.test_existing_observables_and_corrected_errors_are_preserved)",
+      "last_line": "TypeError: XYAnalysis.__init__() got an unexpected keyword argument 'n_resamples'"
+    },
+    {
+      "test": "test_existing_raw_plot_keeps_observables_and_error_bars (test_xy_analysis.XYAnalysisTests.test_existing_raw_plot_keeps_observables_and_error_bars)",
+      "last_line": "TypeError: XYAnalysis.__init__() got an unexpected keyword argument 'n_resamples'"
+    },
+    {
+      "test": "test_joint_crossing_errors_and_ambiguous_curves (test_xy_analysis.XYAnalysisTests.test_joint_crossing_errors_and_ambiguous_curves)",
+      "last_line": "TypeError: XYAnalysis.__init__() got an unexpected keyword argument 'n_resamples'"
+    },
+    {
+      "test": "test_reproducibility_json_and_input_immutability (test_xy_analysis.XYAnalysisTests.test_reproducibility_json_and_input_immutability)",
+      "last_line": "TypeError: XYAnalysis.__init__() got an unexpected keyword argument 'n_resamples'"
+    },
+    {
+      "test": "test_singular_bootstrap_moments_remain_explicitly_undefined (test_xy_analysis.XYAnalysisTests.test_singular_bootstrap_moments_remain_explicitly_undefined)",
+      "last_line": "TypeError: XYAnalysis.__init__() got an unexpected keyword argument 'n_resamples'"
+    },
+    {
+      "test": "test_size_cut_and_temperature_window (test_xy_analysis.XYAnalysisTests.test_size_cut_and_temperature_window)",
+      "last_line": "TypeError: XYAnalysis.__init__() got an unexpected keyword argument 'n_resamples'"
+    },
+    {
+      "test": "test_wm_plot_rescales_values_and_errors_with_one_shared_constant (test_xy_analysis.XYAnalysisTests.test_wm_plot_rescales_values_and_errors_with_one_shared_constant)",
+      "last_line": "TypeError: XYAnalysis.__init__() got an unexpected keyword argument 'n_resamples'"
+    },
+    {
+      "test": "test_zero_uncertainty_cannot_be_used_as_a_weight (test_xy_analysis.XYAnalysisTests.test_zero_uncertainty_cannot_be_used_as_a_weight)",
+      "last_line": "TypeError: XYAnalysis.__init__() got an unexpected keyword argument 'n_resamples'"
+    }
+  ],
+  "focused_tests": {
+    "patterns": [
+      "test_he3.py",
+      "test_he3_energy_difference.py",
+      "test_energy_cache.py",
+      "test_parallel_tempering.py"
+    ],
+    "tests": 30,
+    "failures": 0,
+    "errors": 0,
+    "gpu_available": true
+  },
+  "main_smoke": {
+    "sizes": [
+      32,
+      48,
+      64,
+      80
+    ],
+    "replicas": 100,
+    "thermalization_sweeps": 20,
+    "measurement_sweeps": 100,
+    "sample_interval": 10,
+    "verified": [
+      "main entry point",
+      "PT",
+      "all nine finite sample channels",
+      "temporary save/reload",
+      "finite He3 analysis"
+    ],
+    "original_dataset_written": false
+  }
+}

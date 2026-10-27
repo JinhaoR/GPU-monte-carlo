@@ -5,12 +5,17 @@ import numpy as np
 
 def block_means(data, block_size):
     n = len(data) // block_size
-    return np.asarray(data[:n * block_size]).reshape(n, block_size, *data.shape[1:]).mean(axis=1)
+    return np.asarray(data[:n * block_size]).reshape(
+        n, block_size, *data.shape[1:]
+    ).mean(axis=1)
 
 
 def blocked_mean_error(data, block_size):
     blocks = block_means(data, block_size)
-    return blocks.mean(axis=0), blocks.std(axis=0, ddof=1) / np.sqrt(len(blocks))
+    return (
+        blocks.mean(axis=0),
+        blocks.std(axis=0, ddof=1) / np.sqrt(len(blocks))
+    )
 
 
 def jackknife_from_blocks(blocks, estimator):
@@ -35,9 +40,13 @@ def blocked_jackknife(data, estimator, block_size):
 def bootstrap_block_means(blocks, n_resamples=400, rng=None):
     """Use the same resampled block indices for every channel and temperature."""
     B = len(next(iter(blocks.values())))
-    counts = np.random.default_rng(rng).multinomial(B, [1 / B] * B, size=n_resamples)
-    return {name: np.tensordot(counts / B, x, axes=(1, 0)) for name, x in blocks.items()}
-
+    counts = np.random.default_rng(rng).multinomial(
+        B, [1 / B] * B, size=n_resamples
+    )
+    return {
+        name: np.tensordot(counts / B, x, axes=(1, 0))
+        for name, x in blocks.items()
+    }
 
 def bootstrap_error(estimates):
     values = np.asarray(estimates)

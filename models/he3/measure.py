@@ -1,6 +1,10 @@
-"""Total energy, density, chirality, charge-two phase, and exact twist derivatives."""
+"""Total energy, density, chirality, charge-two phase, and exact twist derivatives.
 
-from numba import cuda, complex128, float64
+Local fields use complex64 arithmetic; lattice sums and cached energies use
+float64. Cached energy stays in physical walker order until output scattering.
+"""
+
+from numba import cuda, complex64, float64
 
 from .update import norm2, potential, gradient
 
@@ -13,26 +17,28 @@ MEASUREMENT_NAMES = (
 
 
 @cuda.jit(device=True)
-def _measure(state, output, betas, K, temperature_indices):
+def _measure(state, output, betas, K, temperature_indices, cached_energies):
     r, tid = cuda.blockIdx.x, cuda.threadIdx.x
     L = state.shape[1]
     shared = cuda.shared.array((9, MEASURE_THREADS), dtype=float64)
-    psi = cuda.local.array((3, 2), dtype=complex128)
+    psi = cuda.local.array((3, 2), dtype=complex64)
     energy, density, chirality, pr, pi = 0.0, 0.0, 0.0, 0.0, 0.0
     ix, kx, iy, ky = 0.0, 0.0, 0.0, 0.0
     for site in range(tid, L * L, cuda.blockDim.x):
         i, j = site // L, site % L
         for mu in range(3):
             psi[mu, 0], psi[mu, 1] = state[r, i, j, mu, 0], state[r, i, j, mu, 1]
-        energy += potential(psi, betas)
+        if cached_energies is None:
+            energy += potential(psi, betas)
         for mu in range(3):
             x, y = psi[mu, 0], psi[mu, 1]
-            xp_x = complex128(state[r, (i + 1) % L, j, mu, 0])
-            xp_y = complex128(state[r, (i + 1) % L, j, mu, 1])
-            yp_x = complex128(state[r, i, (j + 1) % L, mu, 0])
-            yp_y = complex128(state[r, i, (j + 1) % L, mu, 1])
+            xp_x = state[r, (i + 1) % L, j, mu, 0]
+            xp_y = state[r, (i + 1) % L, j, mu, 1]
+            yp_x = state[r, i, (j + 1) % L, mu, 0]
+            yp_y = state[r, i, (j + 1) % L, mu, 1]
             a, b, c, d = xp_x - x, xp_y - y, yp_x - x, yp_y - y
-            energy += K * gradient(a, b, c, d)
+            if cached_energies is None:
+                energy += K * gradient(a, b, c, d)
             density += norm2(x) + norm2(y)
             chirality += 2 * (x.conjugate() * y).imag
             phase = x * x - y * y
@@ -60,19 +66,39 @@ def _measure(state, output, betas, K, temperature_indices):
         stride //= 2
     if tid == 0:
         destination = r if temperature_indices is None else temperature_indices[r]
-        for channel in range(9):
+        # Energy either comes from the reduction or the PT cache.
+        if cached_energies is None:
+            output[0, destination] = shared[0, 0]
+        else:
+            output[0, destination] = cached_energies[r]
+
+        # All remaining observables use the regular reduction.
+        for channel in range(1, 9):
             output[channel, destination] = shared[channel, 0]
 
 
 @cuda.jit
 def he3_measure_kernel(state, output, betas, K):
-    _measure(state, output, betas, K, None)
+    _measure(state, output, betas, K, None, None)
 
 
 @cuda.jit
 def he3_ordered_measure_kernel(state, output, betas, K, temperature_indices):
-    _measure(state, output, betas, K, temperature_indices)
+    _measure(state, output, betas, K, temperature_indices, None)
 
+@cuda.jit
+def he3_cached_measure_kernel(state, output, betas, K, cached_energies):
+    _measure(state, output, betas, K, None, cached_energies)
+
+
+@cuda.jit
+def he3_ordered_cached_measure_kernel(
+    state, output, betas, K, temperature_indices, cached_energies
+):
+    _measure(
+        state, output, betas, K,
+        temperature_indices, cached_energies,
+    )
 
 @cuda.jit
 def he3_energy_kernel(state, output, betas, K):
@@ -80,7 +106,7 @@ def he3_energy_kernel(state, output, betas, K):
     r, tid = cuda.blockIdx.x, cuda.threadIdx.x
     L = state.shape[1]
     shared = cuda.shared.array(MEASURE_THREADS, dtype=float64)
-    psi = cuda.local.array((3, 2), dtype=complex128)
+    psi = cuda.local.array((3, 2), dtype=complex64)
     energy = 0.0
     for site in range(tid, L * L, cuda.blockDim.x):
         i, j = site // L, site % L
@@ -89,10 +115,10 @@ def he3_energy_kernel(state, output, betas, K):
         energy += potential(psi, betas)
         for mu in range(3):
             energy += K * gradient(
-                complex128(state[r, (i + 1) % L, j, mu, 0]) - psi[mu, 0],
-                complex128(state[r, (i + 1) % L, j, mu, 1]) - psi[mu, 1],
-                complex128(state[r, i, (j + 1) % L, mu, 0]) - psi[mu, 0],
-                complex128(state[r, i, (j + 1) % L, mu, 1]) - psi[mu, 1])
+                state[r, (i + 1) % L, j, mu, 0] - psi[mu, 0],
+                state[r, (i + 1) % L, j, mu, 1] - psi[mu, 1],
+                state[r, i, (j + 1) % L, mu, 0] - psi[mu, 0],
+                state[r, i, (j + 1) % L, mu, 1] - psi[mu, 1])
     shared[tid] = energy
     cuda.syncthreads()
     stride = cuda.blockDim.x // 2

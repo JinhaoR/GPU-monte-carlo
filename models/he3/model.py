@@ -7,7 +7,8 @@ from core.model import Model
 from .update import metropolis_color
 from .measure import (
     MEASUREMENT_NAMES, MEASURE_THREADS, he3_measure_kernel,
-    he3_ordered_measure_kernel, he3_energy_kernel,
+    he3_ordered_measure_kernel, he3_energy_kernel, he3_cached_measure_kernel,
+    he3_ordered_cached_measure_kernel,
 )
 
 
@@ -57,15 +58,44 @@ class He3Model(Model):
         metropolis_color[blocks, threads](
             state, rng_states, betas, color, self.betas, self.K, self.delta)
 
-    def measure(self, state, temperature_indices=None):
+    def measure(self, state, temperature_indices=None, cached_energies=None):
         R = state.shape[0]
-        output = cuda.device_array((len(MEASUREMENT_NAMES), R), dtype=np.float64)
-        if temperature_indices is None:
-            he3_measure_kernel[R, MEASURE_THREADS](state, output, self.betas, self.K)
+        output = cuda.device_array(
+            (len(MEASUREMENT_NAMES), R),
+            dtype=np.float64,
+        )
+
+        if cached_energies is None:
+            if temperature_indices is None:
+                he3_measure_kernel[R, MEASURE_THREADS](
+                    state, output, self.betas, self.K,
+                )
+            else:
+                he3_ordered_measure_kernel[R, MEASURE_THREADS](
+                    state, output, self.betas, self.K,
+                    temperature_indices,
+                )
         else:
-            he3_ordered_measure_kernel[R, MEASURE_THREADS](
-                state, output, self.betas, self.K, temperature_indices)
+            if temperature_indices is None:
+                he3_cached_measure_kernel[R, MEASURE_THREADS](
+                    state, output, self.betas, self.K,
+                    cached_energies,
+                )
+            else:
+                he3_ordered_cached_measure_kernel[R, MEASURE_THREADS](
+                    state, output, self.betas, self.K,
+                    temperature_indices, cached_energies,
+                )
+
         return dict(zip(MEASUREMENT_NAMES, output.copy_to_host()))
+
+    def measure_with_energy(self, state, energies, temperature_indices=None):
+        return self.measure(
+            state,
+            temperature_indices=temperature_indices,
+            cached_energies=energies,
+        )
+
 
     def measure_energy(self, state, output):
         he3_energy_kernel[state.shape[0], MEASURE_THREADS](

@@ -100,7 +100,16 @@ class ParallelTempering:
 
     def __init__(self, runtime, exchange_interval=10, seed=None):
 
-        interval = exchange_interval
+        if isinstance(exchange_interval, (bool, np.bool_)):
+            raise ValueError("exchange_interval must be a positive integer")
+        try:
+            interval = operator.index(exchange_interval)
+        except TypeError:
+            raise ValueError("exchange_interval must be a positive integer") from None
+        if interval < 1:
+            raise ValueError("exchange_interval must be a positive integer")
+        if runtime.R < 2:
+            raise ValueError("Parallel tempering requires at least two temperatures")
 
         # One initialization read validates the assignments of the wrapped Runtime.
         beta = runtime.betas.copy_to_host()
@@ -177,6 +186,8 @@ class ParallelTempering:
     def diagnostics(self):
         """Copy small diagnostic arrays to CPU; no transfers occur during exchanges."""
         counts = self._swap_counts.copy_to_host()
+        if np.any(counts[2]):
+            raise FloatingPointError("Nonfinite energies encountered during replica exchange")
         trips = self._trips.copy_to_host()
         w_to_t = self.walker_to_temperature.copy_to_host()
         t_to_w = self.temperature_to_walker.copy_to_host()
