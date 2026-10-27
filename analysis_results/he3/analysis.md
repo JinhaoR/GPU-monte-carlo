@@ -7,9 +7,9 @@
 
 ## Weber–Minnhagen Fit
 
-- Critical temperature: $T_{BKT} = 0.381771$
-- Correction constant: $C = -1.988596$
-- Reduced chi-square: 1.731
+- Critical temperature: $T_{BKT} = 0.381080$
+- Correction constant: $C = -5.514298$
+- Reduced chi-square: 9.556
 
 The helicity modulus is rescaled using:
 
@@ -54,10 +54,10 @@ The WM fit is exploratory. The chirality Binder cumulants are inspected visually
 ```text
 Parallel tempering diagnostics (including thermalization)
 Trip means exclude unfinished trips; zero trips does not imply zero one-way crossings.
-L=64: 288635/413000 accepted, 0 trips, mean None sweeps/trip
+L=64: 3342307/3960000 accepted, 3 trips, mean 693846.6666666666 sweeps/trip
   walker paths recorded
-L=80: 259825/413000 accepted, 0 trips, mean None sweeps/trip
+L=80: 3193624/3960000 accepted, 0 trips, mean None sweeps/trip
   walker paths recorded
-L=96: 232900/413000 accepted, 0 trips, mean None sweeps/trip
+L=96: 3046254/3960000 accepted, 0 trips, mean None sweeps/trip
   walker paths recorded
 ```
