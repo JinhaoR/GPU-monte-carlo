@@ -12,7 +12,7 @@ from utils.temperature_ladder import make_temperature_ladder
 
 def main():
     # System sizes
-    sizes = [32, 48, 64, 80]
+    sizes = [64, 80, 96]
 
     # Physical GL parameters
     pressure = 20.0
@@ -20,12 +20,12 @@ def main():
 
     # Monte Carlo temperature ladder
     temperatures = make_temperature_ladder(
-        T_min=0.36,
-        T_max=0.42,
-        n_T=60,
+        T_min=0.365,
+        T_max=0.415,
+        n_T=100,
         Tc=0.385,
-        tc_window=0.02,
-        tc_fraction=0.40,
+        tc_window=0.01,
+        tc_fraction=0.35,
     )
 
     runs = {}
@@ -52,11 +52,13 @@ def main():
             runtime,
             exchange_interval=10,
             seed=43 + L,
+            tracked_walkers=range(len(temperatures)),
+            history_stride=1,
         )
 
         simulation = Simulation(
             runtime=pt,
-            thermalization_sweeps=100000,
+            thermalization_sweeps=300000,
             measurement_sweeps=500000,
             sample_interval=10,
         )

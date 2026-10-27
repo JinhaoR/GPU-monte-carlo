@@ -12,6 +12,7 @@ from .update import metropolis_color
 from .measure import (
     MEASUREMENT_NAMES, MEASURE_THREADS, kawamura_measure_kernel,
     kawamura_ordered_measure_kernel, kawamura_energy_kernel,
+    kawamura_cached_measure_kernel, kawamura_ordered_cached_measure_kernel,
 )
 
 
@@ -30,16 +31,28 @@ class KawamuraModel(Model):
         metropolis_color[blocks, threads](
             state, rng_states, betas, color, self.J, self.delta)
 
-    def measure(self, state, temperature_indices=None):
+    def measure(self, state, temperature_indices=None, cached_energies=None):
         R = state.shape[0]
         output = cuda.device_array((len(MEASUREMENT_NAMES), R), dtype=np.float64)
-        if temperature_indices is None:
-            kawamura_measure_kernel[R, MEASURE_THREADS](state, output, self.J)
+        if cached_energies is None:
+            if temperature_indices is None:
+                kawamura_measure_kernel[R, MEASURE_THREADS](state, output, self.J)
+            else:
+                kawamura_ordered_measure_kernel[R, MEASURE_THREADS](
+                    state, output, self.J, temperature_indices)
         else:
-            kawamura_ordered_measure_kernel[R, MEASURE_THREADS](
-                state, output, self.J, temperature_indices)
+            if temperature_indices is None:
+                kawamura_cached_measure_kernel[R, MEASURE_THREADS](
+                    state, output, self.J, cached_energies)
+            else:
+                kawamura_ordered_cached_measure_kernel[R, MEASURE_THREADS](
+                    state, output, self.J, temperature_indices, cached_energies)
         values = output.copy_to_host()
         return dict(zip(MEASUREMENT_NAMES, values))
+
+    def measure_with_energy(self, state, energies, temperature_indices=None):
+        return self.measure(
+            state, temperature_indices=temperature_indices, cached_energies=energies)
 
     def measure_energy(self, state, output):
         kawamura_energy_kernel[state.shape[0], MEASURE_THREADS](state, output, self.J)

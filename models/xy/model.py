@@ -7,7 +7,8 @@ from core.model import Model
 from .update import metropolis_color
 from .measure import (
     MEASUREMENT_NAMES, MEASURE_THREADS, xy_measure_kernel,
-    xy_ordered_measure_kernel, xy_energy_kernel
+    xy_ordered_measure_kernel, xy_energy_kernel, xy_cached_measure_kernel,
+    xy_ordered_cached_measure_kernel,
 )
 
 
@@ -29,24 +30,41 @@ class XYModel(Model):
             state, rng_states, betas, color, self.J, self.delta
         )
 
-    def measure(self, state, temperature_indices=None):
+    def measure(self, state, temperature_indices=None, cached_energies=None):
         """Reduce the GPU state to five CPU measurement arrays."""
         R = state.shape[0]
         output = cuda.device_array(
             (len(MEASUREMENT_NAMES), R), dtype=np.float64
         )
-        if temperature_indices is None:
-            xy_measure_kernel[R, MEASURE_THREADS](state, output, self.J)
+        if cached_energies is None:
+            if temperature_indices is None:
+                xy_measure_kernel[R, MEASURE_THREADS](state, output, self.J)
+            else:
+                xy_ordered_measure_kernel[R, MEASURE_THREADS](
+                    state, output, self.J, temperature_indices
+                )
         else:
-            xy_ordered_measure_kernel[R, MEASURE_THREADS](
-                state, output, self.J, temperature_indices
-            )
+            if temperature_indices is None:
+                xy_cached_measure_kernel[R, MEASURE_THREADS](
+                    state, output, self.J, cached_energies
+                )
+            else:
+                xy_ordered_cached_measure_kernel[R, MEASURE_THREADS](
+                    state, output, self.J, temperature_indices, cached_energies
+                )
         results = output.copy_to_host()
 
         return {
             name: results[channel]
             for channel, name in enumerate(MEASUREMENT_NAMES)
         }
+
+    def measure_with_energy(self, state, energies, temperature_indices=None):
+        return self.measure(
+            state,
+            temperature_indices=temperature_indices,
+            cached_energies=energies,
+        )
 
     def parameters(self):
         return {"J": self.J, "delta": self.delta}

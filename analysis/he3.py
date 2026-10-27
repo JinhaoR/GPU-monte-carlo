@@ -66,6 +66,10 @@ pt_figure = pt.plot(show=False)
 if pt_figure is not None:
     figures["parallel_tempering"] = pt_figure
 
+walker_figure = pt.plot_walkers(show=False)
+if walker_figure is not None:
+    figures["walker_temperature_history"] = walker_figure
+
 
 # Save results as Markdown
 output_dir.mkdir(parents=True, exist_ok=True)

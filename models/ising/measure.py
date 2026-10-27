@@ -8,7 +8,7 @@ MEASUREMENT_NAMES = ("energy", "magnetization")
 
 
 @cuda.jit(device=True)
-def _ising_measure(spins, output, J, temperature_indices):
+def _ising_measure(spins, output, J, temperature_indices, cached_energies):
     """One block per replica, with float64 measurement accumulation."""
     r = cuda.blockIdx.x
     tid = cuda.threadIdx.x
@@ -21,11 +21,11 @@ def _ising_measure(spins, output, J, temperature_indices):
         i = k // L
         j = k % L
         s = spins[r, i, j]
-        down = spins[r, (i + 1) % L, j]
-        right = spins[r, i, (j + 1) % L]
-
-        # Count each periodic nearest-neighbor bond once.
-        e += -float64(J) * s * (down + right)
+        if cached_energies is None:
+            down = spins[r, (i + 1) % L, j]
+            right = spins[r, i, (j + 1) % L]
+            # Count each periodic nearest-neighbor bond once.
+            e += -float64(J) * s * (down + right)
         m += s
 
     shared[0, tid] = e
@@ -42,20 +42,30 @@ def _ising_measure(spins, output, J, temperature_indices):
 
     if tid == 0:
         destination = r if temperature_indices is None else temperature_indices[r]
-        for channel in range(2):
-            output[channel, destination] = shared[channel, 0]
+        output[0, destination] = shared[0, 0] if cached_energies is None else cached_energies[r]
+        output[1, destination] = shared[1, 0]
 
 
 @cuda.jit
 def ising_measure_kernel(spins, output, J):
     """Measurements in physical walker order."""
-    _ising_measure(spins, output, J, None)
+    _ising_measure(spins, output, J, None, None)
 
 
 @cuda.jit
 def ising_ordered_measure_kernel(spins, output, J, temperature_indices):
     """Measurements scattered into fixed temperature order on the GPU."""
-    _ising_measure(spins, output, J, temperature_indices)
+    _ising_measure(spins, output, J, temperature_indices, None)
+
+
+@cuda.jit
+def ising_cached_measure_kernel(spins, output, J, cached_energies):
+    _ising_measure(spins, output, J, None, cached_energies)
+
+
+@cuda.jit
+def ising_ordered_cached_measure_kernel(spins, output, J, temperature_indices, cached_energies):
+    _ising_measure(spins, output, J, temperature_indices, cached_energies)
 
 
 @cuda.jit

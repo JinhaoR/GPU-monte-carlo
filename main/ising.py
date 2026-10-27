@@ -14,7 +14,7 @@ from utils.temperature_ladder import make_temperature_ladder
 
 
 def main():
-    sizes = [24, 32, 48, 64]
+    sizes = [48, 64, 80]
 
     J = 1.0
     Tc = 2 * J / np.log(1 + np.sqrt(2))
@@ -51,8 +51,8 @@ def main():
 
         simulation = Simulation(
             runtime=pt,
-            thermalization_sweeps=10000,
-            measurement_sweeps=100000,
+            thermalization_sweeps=100000,
+            measurement_sweeps=500000,
             sample_interval=10
         )
 

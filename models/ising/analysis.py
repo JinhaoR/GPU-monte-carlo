@@ -5,6 +5,7 @@ import matplotlib.pyplot as plt
 
 from utils.Analysis.statistics import block_means, jackknife_from_blocks
 from utils.data_io import load_runs
+from utils.Analysis.joint_histogram import joint_histogram
 
 
 class IsingAnalysis:
@@ -15,7 +16,7 @@ class IsingAnalysis:
 
     def __init__(self, runs, block_size=200):
         self.sizes = sorted(runs)
-
+        self.runs = runs
         metadata = runs[self.sizes[0]]["metadata"]
         self.temperatures = np.asarray(metadata["temperatures"], dtype=float)
         self.J = float(metadata["model_parameters"]["J"])
@@ -89,6 +90,26 @@ class IsingAnalysis:
             for name, value, error in zip(names, values, errors):
                 self.results[L][name] = value
                 self.results[L][name + "_err"] = error
+
+    def joint_distribution(self, L, temperature, bins=40):
+        run = self.runs[L]
+
+        T = np.asarray(run["metadata"]["temperatures"])
+        index = np.argmin(np.abs(T - temperature))
+
+        samples = run["samples"]
+
+        E = samples["energy"][:, index]
+        M = samples["magnetization"][:, index]
+
+        N = L * L
+
+        e = E / N
+        m = M / N
+
+        hist = joint_histogram(e, m, bins=bins)
+
+        return float(T[index]), hist
 
     def plot(self, show=True):
         T = self.temperatures

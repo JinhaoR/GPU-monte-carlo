@@ -1,11 +1,13 @@
 
 from pathlib import Path
 
+import numpy as np
 import matplotlib.pyplot as plt
 
 from models.ising.analysis import IsingAnalysis
 from utils.Analysis.parallel_tempering import PTAnalysis
 from utils.data_io import load_runs
+from utils.Analysis.joint_histogram import joint_histogram_from_run, plot_joint_histogram
 
 
 # Settings
@@ -22,6 +24,27 @@ ising = IsingAnalysis(runs, block_size=block_size)
 figures = {
     "ising_observables": ising.plot(show=False),
 }
+
+L = 64
+Tc = 2 / np.log(1 + np.sqrt(2))
+
+actual_T, hist = joint_histogram_from_run(
+    runs[L],
+    temperature=Tc,
+    x_name="energy",
+    y_name="magnetization",
+    x_transform=lambda x: x / L**2,
+    y_transform=lambda y: y / L**2,
+)
+
+figures.update(
+    plot_joint_histogram(
+        hist,
+        x_label="Energy density",
+        y_label="Magnetization",
+        title=f"Ising L={L}, T={actual_T:.5f}",
+    )
+)
 
 # Parallel tempering analysis
 pt = PTAnalysis(runs)

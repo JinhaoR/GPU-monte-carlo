@@ -15,7 +15,7 @@ MEASUREMENT_NAMES = (
 )
 
 @cuda.jit(device=True)
-def _xy_measure(state, output, J, temperature_indices):
+def _xy_measure(state, output, J, temperature_indices, cached_energies):
     """One block per replica, one global output per channel and replica."""
     r = cuda.blockIdx.x
     tid = cuda.threadIdx.x
@@ -37,14 +37,15 @@ def _xy_measure(state, output, J, temperature_indices):
 
         theta = float64(state[r, i, j])
         theta_x = float64(state[r, (i + 1) % L, j])
-        theta_y = float64(state[r, i, (j + 1) % L])
 
         dx = theta - theta_x
-        dy = theta - theta_y
         cos_x = math.cos(dx)
-        cos_y = math.cos(dy)
 
-        e += -J * (cos_x + cos_y)
+        if cached_energies is None:
+            theta_y = float64(state[r, i, (j + 1) % L])
+            dy = theta - theta_y
+            cos_y = math.cos(dy)
+            e += -J * (cos_x + cos_y)
         mx += math.cos(theta)
         my += math.sin(theta)
         cx += cos_x
@@ -68,20 +69,36 @@ def _xy_measure(state, output, J, temperature_indices):
 
     if tid == 0:
         destination = r if temperature_indices is None else temperature_indices[r]
-        for channel in range(5):
+        if cached_energies is None:
+            output[0, destination] = shared[0, 0]
+        else:
+            output[0, destination] = cached_energies[r]
+        for channel in range(1, 5):
             output[channel, destination] = shared[channel, 0]
 
 
 @cuda.jit
 def xy_measure_kernel(state, output, J):
     """Measurements in physical walker order."""
-    _xy_measure(state, output, J, None)
+    _xy_measure(state, output, J, None, None)
 
 
 @cuda.jit
 def xy_ordered_measure_kernel(state, output, J, temperature_indices):
     """Measurements scattered into fixed temperature order on the GPU."""
-    _xy_measure(state, output, J, temperature_indices)
+    _xy_measure(state, output, J, temperature_indices, None)
+
+
+@cuda.jit
+def xy_cached_measure_kernel(state, output, J, cached_energies):
+    """Measurements with cached energies in physical walker order."""
+    _xy_measure(state, output, J, None, cached_energies)
+
+
+@cuda.jit
+def xy_ordered_cached_measure_kernel(state, output, J, temperature_indices, cached_energies):
+    """Scatter measurements and cached walker energies into temperature order."""
+    _xy_measure(state, output, J, temperature_indices, cached_energies)
 
 
 @cuda.jit

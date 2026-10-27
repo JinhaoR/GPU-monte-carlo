@@ -1,12 +1,20 @@
 # Ising Analysis
 
 **Data:** `data/ising_run.npz`
-**System sizes:** [24, 32, 48, 64]
+**System sizes:** [48, 64, 80]
 **Block size:** 200
 
 ## Ising Observables
 
 ![ising_observables](./ising_observables.png)
+
+## Joint Heatmap
+
+![joint_heatmap](./joint_heatmap.png)
+
+## Joint Surface
+
+![joint_surface](./joint_surface.png)
 
 ## Parallel Tempering
 
@@ -15,9 +23,12 @@
 ## Parallel Tempering Summary
 
 ```text
-Parallel tempering diagnostics (includes thermalization)
-L=24: 526152/544500 accepted, 1176 trips, mean 8728.010204081633 sweeps/trip
-L=32: 520025/544500 accepted, 909 trips, mean 11119.47194719472 sweeps/trip
-L=48: 507453/544500 accepted, 584 trips, mean 16539.554794520547 sweeps/trip
-L=64: 495481/544500 accepted, 369 trips, mean 24092.140921409213 sweeps/trip
+Parallel tempering diagnostics (including thermalization)
+Trip means exclude unfinished trips; zero trips does not imply zero one-way crossings.
+L=48: 2768880/2970000 accepted, 3327 trips, mean 17588.662458671475 sweeps/trip
+  walker paths were not recorded; final mappings cannot reconstruct trajectories
+L=64: 2701910/2970000 accepted, 2349 trips, mean 24748.446147296723 sweeps/trip
+  walker paths were not recorded; final mappings cannot reconstruct trajectories
+L=80: 2636336/2970000 accepted, 1779 trips, mean 32205.182686902754 sweeps/trip
+  walker paths were not recorded; final mappings cannot reconstruct trajectories
 ```

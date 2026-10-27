@@ -7,11 +7,11 @@ from unittest.mock import patch
 import numpy as np
 from numba import cuda
 
-from core.model import Model
 from core.parallel_tempering import ParallelTempering
 from core.runtime import Runtime
 from models.he3.model import He3Model
 from models.ising.model import IsingModel
+from models.kawamura.model import KawamuraModel
 from models.xy.model import XYModel
 
 
@@ -159,29 +159,64 @@ class EnergyCacheTests(unittest.TestCase):
         cached.assert_not_called()
         self.assert_measurements_equal(actual, expected)
 
-    def test_default_model_hook_preserves_xy_and_ising_measurements_and_ordering(self):
+    def test_ising_xy_kawamura_reuse_energy_and_preserve_measurements_and_ordering(self):
         rng = np.random.default_rng(215)
-        for model in (XYModel(J=1.3), IsingModel(J=0.9)):
-            with self.subTest(model=type(model).__name__):
-                self.assertIs(type(model).measure_with_energy, Model.measure_with_energy)
-                runtime = Runtime(model, L=4, temperatures=[0.4, 0.6, 0.8],
-                                  threads=2, seed=216)
-                if isinstance(model, XYModel):
-                    state = rng.uniform(-np.pi, np.pi, (3, 4, 4)).astype(np.float32)
-                else:
-                    state = rng.choice([-1, 1], size=(3, 4, 4)).astype(np.int8)
-                runtime.state.copy_to_device(state)
-                runtime.invalidate_energy_cache()
-                mapping = cuda.to_device(np.array([2, 0, 1], dtype=np.int32))
-                expected = model.measure(runtime.state, temperature_indices=mapping)
-                energies = self.cache_energy(runtime)
-                original_energies = energies.copy_to_host()
-                with patch.object(model, "measure_with_energy",
-                                  wraps=model.measure_with_energy) as fallback:
-                    actual = runtime.measure(temperature_indices=mapping)
-                fallback.assert_called_once()
-                self.assert_measurements_equal(actual, expected)
-                np.testing.assert_array_equal(energies.copy_to_host(), original_energies)
+        for model in (XYModel(J=1.3), IsingModel(J=0.9), KawamuraModel(J=1.1)):
+            for L in (4, 6, 20):
+                with self.subTest(model=type(model).__name__, L=L):
+                    runtime = Runtime(model, L=L, temperatures=[0.4, 0.6, 0.8],
+                                      threads=2, seed=216)
+                    if isinstance(model, XYModel):
+                        state = rng.uniform(-np.pi, np.pi, (3, L, L)).astype(np.float32)
+                    elif isinstance(model, IsingModel):
+                        state = rng.choice([-1, 1], size=(3, L, L)).astype(np.int8)
+                    else:
+                        state = np.empty((3, L, L, 5), dtype=np.float32)
+                        state[..., 0] = rng.uniform(-np.pi, np.pi, (3, L, L))
+                        state[..., 1] = rng.choice([-1, 1], size=(3, L, L))
+                        spin = rng.normal(size=(3, L, L, 3))
+                        state[..., 2:] = spin / np.linalg.norm(spin, axis=-1, keepdims=True)
+                    runtime.state.copy_to_device(state)
+                    runtime.invalidate_energy_cache()
+                    expected = model.measure(runtime.state)
+                    energies = self.cache_energy(runtime)
+                    original_energies = energies.copy_to_host()
+                    with patch.object(model, "measure_with_energy",
+                                      wraps=model.measure_with_energy) as cached:
+                        actual = runtime.measure()
+                    cached.assert_called_once()
+                    for name in expected:
+                        np.testing.assert_allclose(actual[name], expected[name],
+                                                   rtol=1e-12, atol=1e-10)
+                    np.testing.assert_array_equal(actual["energy"], original_energies)
+
+                    order = np.array([2, 0, 1], dtype=np.int32)
+                    mapping = cuda.to_device(order)
+                    ordered = runtime.measure(temperature_indices=mapping)
+                    for name in actual:
+                        np.testing.assert_allclose(ordered[name][order], actual[name],
+                                                   rtol=1e-12, atol=1e-10)
+                    np.testing.assert_array_equal(energies.copy_to_host(), original_energies)
+
+                    # Distinct supplied values prove that the cached path uses
+                    # its input, rather than silently recomputing the energy.
+                    sentinel = np.array([12345., -6789., .125])
+                    energies.copy_to_device(sentinel)
+                    reused = runtime.measure(temperature_indices=mapping)
+                    np.testing.assert_array_equal(reused["energy"][order], sentinel)
+                    for name in expected.keys() - {"energy"}:
+                        np.testing.assert_allclose(reused[name][order], expected[name],
+                                                   rtol=1e-12, atol=1e-10)
+                    np.testing.assert_array_equal(energies.copy_to_host(), sentinel)
+
+                    runtime.sweep()
+                    with patch.object(model, "measure_with_energy",
+                                      wraps=model.measure_with_energy) as cached:
+                        fresh = runtime.measure()
+                    cached.assert_not_called()
+                    reference = model.measure(runtime.state)
+                    for name in reference:
+                        np.testing.assert_array_equal(fresh[name], reference[name])
 
 
 if __name__ == "__main__":

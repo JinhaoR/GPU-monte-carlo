@@ -76,6 +76,65 @@ class PTAnalysisTests(unittest.TestCase):
         self.assertIn("including thermalization", analysis.format_summary())
         self.assertIn("exclude unfinished trips", analysis.format_summary())
 
+    def test_missing_history_produces_no_additional_plot(self):
+        analysis = PTAnalysis({16: saved_run()})
+        self.assertIsNone(analysis.plot_walkers(show=False))
+        self.assertFalse(analysis.summary()[16]["history_available"])
+
+    def test_heatmap_preserves_walker_ids_temperatures_and_irregular_times(self):
+        run = saved_run()
+        run["metadata"]["thermalization_sweeps"] = 10
+        run["metadata"]["parallel_tempering"]["walker_history"] = {
+            "walker_ids": [2, 0], "sweeps": [0, 10, 11],
+            "temperature_indices": [[2, 0], [1, 1], [0, 2]],
+            "stride": 1, "stride_units": "exchange_rounds",
+        }
+        before = copy.deepcopy(run)
+        analysis = PTAnalysis({16: run})
+        ax = analysis.plot_walkers(show=False).axes[0]
+        mesh = ax.collections[0]
+        np.testing.assert_array_equal(mesh.get_array(), [[.8, .9, 1.0], [1.0, .9, .8]])
+        np.testing.assert_array_equal(mesh.get_coordinates()[0, :, 0], [0, 5, 10.5, 11])
+        self.assertEqual([tick.get_text() for tick in ax.get_yticklabels()], ["0", "2"])
+        self.assertEqual(run, before)
+        self.assertTrue(analysis.summary()[16]["history_available"])
+
+    def test_heatmap_includes_all_sixty_walkers(self):
+        run = saved_run()
+        temperatures = np.linspace(.36, .42, 60)
+        run["metadata"]["temperatures"] = temperatures
+        positions = np.stack([np.arange(60), np.roll(np.arange(60), 1)])
+        run["metadata"]["parallel_tempering"]["walker_history"] = {
+            "walker_ids": np.arange(60), "sweeps": [0, 100],
+            "temperature_indices": positions,
+        }
+        figure = PTAnalysis({16: run}).plot_walkers(show=False)
+        ax = figure.axes[0]
+        self.assertIn("all walkers", ax.get_title())
+        np.testing.assert_array_equal(ax.collections[0].get_array(), temperatures[positions].T)
+        self.assertEqual(ax.collections[0].get_array().shape, (60, 2))
+
+    def test_repeated_sweeps_keep_last_position_and_single_times_render(self):
+        run = saved_run()
+        run["metadata"]["parallel_tempering"]["walker_history"] = {
+            "walker_ids": [0], "sweeps": [0, 0],
+            "temperature_indices": [[0], [2]],
+        }
+        ax = PTAnalysis({16: run}).plot_walkers(show=False).axes[0]
+        np.testing.assert_array_equal(ax.collections[0].get_array(), [[1.0]])
+        np.testing.assert_array_equal(ax.collections[0].get_coordinates()[0, :, 0], [-.5, .5])
+
+    def test_invalid_history_is_rejected(self):
+        run = saved_run()
+        for positions in ([[0], [3]], [[0.0], [1.0]], [[0, 1]]):
+            with self.subTest(positions=positions):
+                run["metadata"]["parallel_tempering"]["walker_history"] = {
+                    "walker_ids": [0], "sweeps": [0, 10],
+                    "temperature_indices": positions,
+                }
+                with self.assertRaises(ValueError):
+                    PTAnalysis({16: run})
+
 
 if __name__ == "__main__":
     unittest.main()

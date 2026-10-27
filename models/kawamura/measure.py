@@ -12,7 +12,7 @@ MEASUREMENT_NAMES = (
 
 
 @cuda.jit(device=True)
-def _measure(state, output, J, temperature_indices):
+def _measure(state, output, J, temperature_indices, cached_energies):
     r, tid = cuda.blockIdx.x, cuda.threadIdx.x
     L = state.shape[1]
     shared = cuda.shared.array((12, MEASURE_THREADS), dtype=float64)
@@ -31,7 +31,8 @@ def _measure(state, output, J, temperature_indices):
         xy += dx * dy
         xz += dx * dz
         yz += dy * dz
-        for direction in range(2):
+        directions = 2 if cached_energies is None else 1
+        for direction in range(directions):
             ni = (i + 1) % L if direction == 0 else i
             nj = j if direction == 0 else (j + 1) % L
             dot = (dx * float64(state[r, ni, nj, 2]) + dy * float64(state[r, ni, nj, 3])
@@ -39,7 +40,8 @@ def _measure(state, output, J, temperature_indices):
             weight = (1 + tau * float64(state[r, ni, nj, 1])) * dot
             angle = theta - float64(state[r, ni, nj, 0])
             cosine = weight * math.cos(angle)
-            e -= J * cosine
+            if cached_energies is None:
+                e -= J * cosine
             if direction == 0:
                 cx += cosine
                 qx += weight * math.sin(angle)
@@ -53,13 +55,15 @@ def _measure(state, output, J, temperature_indices):
     stride = cuda.blockDim.x // 2
     while stride > 0:
         if tid < stride:
-            for channel in range(12):
+            first_channel = 0 if cached_energies is None else 1
+            for channel in range(first_channel, 12):
                 shared[channel, tid] += shared[channel, tid + stride]
         cuda.syncthreads()
         stride //= 2
     if tid == 0:
         destination = r if temperature_indices is None else temperature_indices[r]
-        for channel in range(4):
+        output[0, destination] = shared[0, 0] if cached_energies is None else cached_energies[r]
+        for channel in range(1, 4):
             output[channel, destination] = shared[channel, 0]
         # D=(dd^T-I/3)/sqrt(3); off-diagonal tensor entries occur twice.
         output[4, destination] = (shared[4, 0]**2 + shared[5, 0]**2 + shared[6, 0]**2
@@ -69,12 +73,24 @@ def _measure(state, output, J, temperature_indices):
 
 @cuda.jit
 def kawamura_measure_kernel(state, output, J):
-    _measure(state, output, J, None)
+    _measure(state, output, J, None, None)
 
 
 @cuda.jit
 def kawamura_ordered_measure_kernel(state, output, J, temperature_indices):
-    _measure(state, output, J, temperature_indices)
+    _measure(state, output, J, temperature_indices, None)
+
+
+@cuda.jit
+def kawamura_cached_measure_kernel(state, output, J, cached_energies):
+    _measure(state, output, J, None, cached_energies)
+
+
+@cuda.jit
+def kawamura_ordered_cached_measure_kernel(
+    state, output, J, temperature_indices, cached_energies
+):
+    _measure(state, output, J, temperature_indices, cached_energies)
 
 
 @cuda.jit

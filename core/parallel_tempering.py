@@ -26,6 +26,13 @@ _ROUND_TRIP_SWEEPS = 4
 
 
 @cuda.jit
+def _record_walkers_kernel(walker_to_temperature, walker_ids, history, row):
+    column = cuda.grid(1)
+    if column < walker_ids.size:
+        history[row, column] = walker_to_temperature[walker_ids[column]]
+
+
+@cuda.jit
 def _exchange_kernel(
     energies, betas, walker_to_temperature, temperature_to_walker,
     rng_states, swap_counts, trips, parity, sweep,
@@ -96,9 +103,15 @@ class ParallelTempering:
     Use the wrapper exclusively after construction. Diagnostics are cumulative
     from construction, including thermalization and any repeated Simulation runs.
     The wrapped model must provide GPU total energies and ordered measurements.
+
+    tracked_walkers enables optional GPU trajectory recording for those walker
+    IDs. history_stride counts exchange rounds, not local sweeps. diagnostics()
+    exports sampled positions, their sweep/round coordinates, and the current
+    final position. Exact round-trip counters are independent of this stride.
     """
 
-    def __init__(self, runtime, exchange_interval=10, seed=None):
+    def __init__(self, runtime, exchange_interval=10, seed=None,
+                 tracked_walkers=None, history_stride=10):
 
         if isinstance(exchange_interval, (bool, np.bool_)):
             raise ValueError("exchange_interval must be a positive integer")
@@ -110,6 +123,29 @@ class ParallelTempering:
             raise ValueError("exchange_interval must be a positive integer")
         if runtime.R < 2:
             raise ValueError("Parallel tempering requires at least two temperatures")
+        if isinstance(history_stride, (bool, np.bool_)):
+            raise ValueError("history_stride must be a positive integer")
+        try:
+            history_stride = operator.index(history_stride)
+        except TypeError:
+            raise ValueError("history_stride must be a positive integer") from None
+        if history_stride < 1:
+            raise ValueError("history_stride must be a positive integer")
+        walker_ids = None
+        if tracked_walkers is not None:
+            try:
+                values = list(tracked_walkers)
+                if any(isinstance(value, (bool, np.bool_)) for value in values):
+                    raise ValueError("tracked_walkers must contain integer walker IDs")
+                walker_ids = np.asarray([operator.index(value) for value in values],
+                                        dtype=np.int64)
+            except (TypeError, OverflowError):
+                raise ValueError("tracked_walkers must contain integer walker IDs") from None
+            if (walker_ids.ndim != 1 or not len(walker_ids)
+                    or np.any(walker_ids < 0) or np.any(walker_ids >= runtime.R)
+                    or len(np.unique(walker_ids)) != len(walker_ids)):
+                raise ValueError("tracked_walkers must be distinct IDs in range(R)")
+            walker_ids = walker_ids.astype(np.int32)
 
         # One initialization read validates the assignments of the wrapped Runtime.
         beta = runtime.betas.copy_to_host()
@@ -151,6 +187,61 @@ class ParallelTempering:
         trips[_START_SWEEP, [0, -1]] = 0
         self._trips = cuda.to_device(trips)
 
+        # Optional device-side trajectory capture. The stride counts exchange
+        # rounds; the exact sweep/round coordinates accompany each saved row.
+        # Chunks grow as needed, so repeated Simulation runs cannot overflow a
+        # fixed recording buffer. No history is copied to the CPU in sweep().
+        self._tracked_walkers = walker_ids
+        self._history_stride = history_stride
+        self._history_chunk_rows = 1024
+        self._history_chunks = []
+        self._history_sweeps = []
+        self._history_rounds = []
+        self._tracked_walkers_gpu = (
+            None if walker_ids is None else cuda.to_device(walker_ids)
+        )
+        if walker_ids is not None:
+            self._record_walker_history()
+
+    def _record_walker_history(self):
+        row = len(self._history_sweeps) % self._history_chunk_rows
+        if row == 0:
+            self._history_chunks.append(cuda.device_array(
+                (self._history_chunk_rows, len(self._tracked_walkers)), dtype=np.int32,
+            ))
+        blocks = (len(self._tracked_walkers) + 127) // 128
+        _record_walkers_kernel[blocks, 128](
+            self.walker_to_temperature, self._tracked_walkers_gpu,
+            self._history_chunks[-1], row,
+        )
+        self._history_sweeps.append(self.sweeps)
+        self._history_rounds.append(self.exchange_rounds)
+
+    def _walker_history(self, final_walker_to_temperature):
+        count = len(self._history_sweeps)
+        rows = []
+        for chunk in self._history_chunks:
+            used = min(self._history_chunk_rows, count)
+            rows.append(chunk[:used].copy_to_host())
+            count -= used
+        positions = np.concatenate(rows, axis=0)
+        sweeps = np.asarray(self._history_sweeps, dtype=np.int64)
+        rounds = np.asarray(self._history_rounds, dtype=np.int64)
+        if rounds[-1] != self.exchange_rounds or sweeps[-1] != self.sweeps:
+            # Include the current position without changing recording state.
+            positions = np.concatenate((positions,
+                final_walker_to_temperature[self._tracked_walkers][None, :]), axis=0)
+            sweeps = np.append(sweeps, self.sweeps)
+            rounds = np.append(rounds, self.exchange_rounds)
+        return {
+            "walker_ids": self._tracked_walkers.copy(),
+            "sweeps": sweeps,
+            "exchange_rounds": rounds,
+            "temperature_indices": positions,
+            "stride": self._history_stride,
+            "stride_units": "exchange_rounds",
+        }
+
     def sweep(self):
         self.runtime.sweep()
         self.sweeps += 1
@@ -173,6 +264,9 @@ class ParallelTempering:
         self.exchange_rounds += 1
         if self.R > 2:
             self._parity = 1 - self._parity
+        if (self._tracked_walkers is not None
+                and self.exchange_rounds % self._history_stride == 0):
+            self._record_walker_history()
 
     def measure(self):
         """Return CPU observables in the original, fixed temperature order."""
@@ -201,7 +295,7 @@ class ParallelTempering:
             float(trips[_ROUND_TRIP_SWEEPS].sum()) / completed
             if completed else None
         )
-        return {
+        result = {
             "exchange_interval": self.exchange_interval,
             "exchange_seed": self.exchange_seed,
             "sweeps": self.sweeps,
@@ -218,3 +312,6 @@ class ParallelTempering:
             "walker_round_trip_total_sweeps": trips[_ROUND_TRIP_SWEEPS].copy(),
             "mean_round_trip_sweeps": mean_trip,
         }
+        if self._tracked_walkers is not None:
+            result["walker_history"] = self._walker_history(w_to_t)
+        return result
