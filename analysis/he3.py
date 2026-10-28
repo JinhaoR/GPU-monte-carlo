@@ -7,6 +7,13 @@ from models.he3.analysis import He3Analysis
 from utils.Analysis.parallel_tempering import PTAnalysis
 from utils.data_io import load_runs
 
+import numpy as np
+
+from utils.Analysis.joint_histogram import (
+    joint_histogram,
+    plot_joint_histogram,
+)
+
 
 # Settings
 input_file = "data/he3_run.npz"
@@ -19,6 +26,11 @@ q = 0.5  # Ordinary vortices: 1.0; half-quantum vortices: 0.5
 # Optional fit window
 wm_temperature_range = None
 
+
+# Joint probability distributions
+joint_L = 96
+joint_temperature = 0.39
+joint_bins = 40
 
 # Load data
 runs = load_runs(input_file)
@@ -53,6 +65,96 @@ ax = figures["helicity"].axes[0]
 
 ax.legend(frameon=False)
 
+
+# ----------------------------------------
+# Joint probability distributions
+# ----------------------------------------
+
+run = runs[joint_L]
+
+temperatures = np.asarray(run["metadata"]["temperatures"])
+idx = np.argmin(np.abs(temperatures - joint_temperature))
+actual_T = float(temperatures[idx])
+
+print(
+    f"Joint distributions: L={joint_L}, "
+    f"requested T={joint_temperature:.5f}, "
+    f"actual T={actual_T:.5f}"
+)
+
+s = run["samples"]
+N = joint_L**2
+
+# Extract simultaneous measurements at the selected temperature
+E = s["energy"][:, idx]
+D = s["density"][:, idx]
+C_chi = s["chirality"][:, idx]
+R = s["phase_real"][:, idx]
+I = s["phase_imag"][:, idx]
+
+# Keep valid measurements
+valid = (
+    np.isfinite(E)
+    & np.isfinite(D)
+    & (D > 0)
+    & np.isfinite(C_chi)
+    & np.isfinite(R)
+    & np.isfinite(I)
+)
+
+E, D, C_chi, R, I = (
+    array[valid] for array in (E, D, C_chi, R, I)
+)
+
+# Construct physical observables
+e = E / N
+n = D / N
+
+chi = C_chi / D
+abs_chi = np.abs(chi)
+
+p2 = np.hypot(R, I) / N
+
+
+# ----------------------------------------
+# Select observable pairs
+# ----------------------------------------
+
+pairs = {
+    "energy_chirality": (
+        e, chi,
+        r"Energy density $e$",
+        r"Signed chirality $m_\chi$",
+    ),
+    "energy_phase": (
+        e, p2,
+        r"Energy density $e$",
+        r"Composite phase magnitude $p_2$",
+    ),
+}
+
+
+# ----------------------------------------
+# Generate 2D and 3D plots
+# ----------------------------------------
+
+for name, (x, y, x_label, y_label) in pairs.items():
+
+    hist = joint_histogram(
+        x,
+        y,
+        bins=joint_bins,
+    )
+
+    plots = plot_joint_histogram(
+        hist,
+        x_label=x_label,
+        y_label=y_label,
+        title=f"He3: {name}, L={joint_L}, T={actual_T:.5f}",
+    )
+
+    for plot_name, fig in plots.items():
+        figures[f"joint_L{joint_L}_{name}_{plot_name}"] = fig
 
 
 # Parallel tempering analysis

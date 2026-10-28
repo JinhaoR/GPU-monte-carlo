@@ -41,6 +41,22 @@ The WM fit is exploratory. The chirality Binder cumulants are inspected visually
 
 ![density](./density.png)
 
+## Joint L96 Energy Chirality Joint Heatmap
+
+![joint_L96_energy_chirality_joint_heatmap](./joint_L96_energy_chirality_joint_heatmap.png)
+
+## Joint L96 Energy Chirality Joint Surface
+
+![joint_L96_energy_chirality_joint_surface](./joint_L96_energy_chirality_joint_surface.png)
+
+## Joint L96 Energy Phase Joint Heatmap
+
+![joint_L96_energy_phase_joint_heatmap](./joint_L96_energy_phase_joint_heatmap.png)
+
+## Joint L96 Energy Phase Joint Surface
+
+![joint_L96_energy_phase_joint_surface](./joint_L96_energy_phase_joint_surface.png)
+
 ## Parallel Tempering
 
 ![parallel_tempering](./parallel_tempering.png)

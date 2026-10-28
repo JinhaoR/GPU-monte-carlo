@@ -33,6 +33,7 @@ actual_T, hist = joint_histogram_from_run(
     temperature=Tc,
     x_name="energy",
     y_name="magnetization",
+    bins=80,
     x_transform=lambda x: x / L**2,
     y_transform=lambda y: y / L**2,
 )
