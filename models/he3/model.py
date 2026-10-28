@@ -27,7 +27,7 @@ _STRONG_COUPLING = np.array([
 
 class He3Model(Model):
     def __init__(self, K=1.0, betas=(-0.5, 1, 1, 1, -1), delta=0.15,
-                 pressure=None, reduced_temperature=1.0):
+                 pressure=None, reduced_temperature=1.0, g_d=0):
         """Add pressure corrections to betas at a fixed physical T/Tc.
 
         pressure=None keeps the supplied betas; pressure=0 includes the
@@ -45,6 +45,10 @@ class He3Model(Model):
         self.betas = tuple(np.float32(b) for b in coefficients)
         self.delta = np.float32(delta)
 
+        if not np.isfinite(g_d) or g_d < 0:
+            raise ValueError("g_d must be finite and nonnegative")
+        self.g_d = np.float32(g_d)
+
     def initialize_state(self, L, replicas, seed):
         state = np.zeros((replicas, L, L, 3, 2), dtype=np.complex64)
         # A homogeneous positive-chirality minimum: d=(0,0,1), theta=0.
@@ -56,7 +60,7 @@ class He3Model(Model):
 
     def update_color(self, state, rng_states, betas, color, blocks, threads):
         metropolis_color[blocks, threads](
-            state, rng_states, betas, color, self.betas, self.K, self.delta)
+            state, rng_states, betas, color, self.betas, self.K, self.delta, self.g_d)
 
     def measure(self, state, temperature_indices=None, cached_energies=None):
         R = state.shape[0]
@@ -103,4 +107,8 @@ class He3Model(Model):
 
     def parameters(self):
         return {"K": self.K, "betas": self.betas, "delta": self.delta,
-                "pressure": self.pressure, "reduced_temperature": self.reduced_temperature}
+                "pressure": self.pressure, "reduced_temperature": self.reduced_temperature,
+                "g_d": float(self.g_d), "dipole_length_lattice": (
+                    float(np.sqrt(2.0 * self.K / self.g_d))
+                    if self.g_d > 0 else None
+                )}

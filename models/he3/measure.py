@@ -17,7 +17,7 @@ MEASUREMENT_NAMES = (
 
 
 @cuda.jit(device=True)
-def _measure(state, output, betas, K, temperature_indices, cached_energies):
+def _measure(state, output, betas, K, temperature_indices, cached_energies, g_d):
     r, tid = cuda.blockIdx.x, cuda.threadIdx.x
     L = state.shape[1]
     shared = cuda.shared.array((9, MEASURE_THREADS), dtype=float64)
@@ -29,7 +29,7 @@ def _measure(state, output, betas, K, temperature_indices, cached_energies):
         for mu in range(3):
             psi[mu, 0], psi[mu, 1] = state[r, i, j, mu, 0], state[r, i, j, mu, 1]
         if cached_energies is None:
-            energy += potential(psi, betas)
+            energy += potential(psi, betas, g_d)
         for mu in range(3):
             x, y = psi[mu, 0], psi[mu, 1]
             xp_x = state[r, (i + 1) % L, j, mu, 0]
@@ -78,30 +78,30 @@ def _measure(state, output, betas, K, temperature_indices, cached_energies):
 
 
 @cuda.jit
-def he3_measure_kernel(state, output, betas, K):
-    _measure(state, output, betas, K, None, None)
+def he3_measure_kernel(state, output, betas, K, g_d):
+    _measure(state, output, betas, K, None, None, g_d)
 
 
 @cuda.jit
-def he3_ordered_measure_kernel(state, output, betas, K, temperature_indices):
-    _measure(state, output, betas, K, temperature_indices, None)
+def he3_ordered_measure_kernel(state, output, betas, K, temperature_indices, g_d):
+    _measure(state, output, betas, K, temperature_indices, None, g_d)
 
 @cuda.jit
-def he3_cached_measure_kernel(state, output, betas, K, cached_energies):
-    _measure(state, output, betas, K, None, cached_energies)
+def he3_cached_measure_kernel(state, output, betas, K, cached_energies, g_d):
+    _measure(state, output, betas, K, None, cached_energies, g_d)
 
 
 @cuda.jit
 def he3_ordered_cached_measure_kernel(
-    state, output, betas, K, temperature_indices, cached_energies
+    state, output, betas, K, temperature_indices, cached_energies, g_d
 ):
     _measure(
         state, output, betas, K,
-        temperature_indices, cached_energies,
+        temperature_indices, cached_energies, g_d
     )
 
 @cuda.jit
-def he3_energy_kernel(state, output, betas, K):
+def he3_energy_kernel(state, output, betas, K, g_d):
     """Current total walker energies for PT, without a host transfer."""
     r, tid = cuda.blockIdx.x, cuda.threadIdx.x
     L = state.shape[1]
@@ -112,7 +112,7 @@ def he3_energy_kernel(state, output, betas, K):
         i, j = site // L, site % L
         for mu in range(3):
             psi[mu, 0], psi[mu, 1] = state[r, i, j, mu, 0], state[r, i, j, mu, 1]
-        energy += potential(psi, betas)
+        energy += potential(psi, betas, g_d)
         for mu in range(3):
             energy += K * gradient(
                 state[r, (i + 1) % L, j, mu, 0] - psi[mu, 0],

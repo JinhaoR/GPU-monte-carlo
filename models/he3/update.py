@@ -12,7 +12,25 @@ def norm2(z):
 
 
 @cuda.jit(device=True)
-def potential(psi, betas):
+def dipole_invariant(psi, n):
+    # Spin rows x,y,z; orbital columns x,y.
+    a = psi[0, 0]  # A_xx
+    b = psi[0, 1]  # A_xy
+    c = psi[1, 0]  # A_yx
+    d = psi[1, 1]  # A_yy
+
+    return (
+        norm2(a + d)
+        + norm2(a)
+        + norm2(d)
+        + float32(2.0) * (b * c.conjugate()).real
+        - float32(2.0 / 3.0) * n
+    )
+
+
+
+@cuda.jit(device=True)
+def potential(psi, betas, g_d):
     """-2 n + beta_1 I_1 + ... + beta_5 I_5, using orbital contractions."""
     nx, ny = norm2(psi[0, 0]), norm2(psi[0, 1])
     xx, yy = psi[0, 0] * psi[0, 0], psi[0, 1] * psi[0, 1]
@@ -32,8 +50,17 @@ def potential(psi, betas):
     i3 = nx * nx + ny * ny + two * (overlap * overlap).real
     i4 = nx * nx + ny * ny + two * norm2(overlap)
     i5 = norm2(xx) + norm2(yy) + two * norm2(xy)
-    return (-two * n + betas[0] * i1 + betas[1] * i2
-            + betas[2] * i3 + betas[3] * i4 + betas[4] * i5)
+    dipole = dipole_invariant(psi, n)
+
+    return (
+        -two * n
+        + betas[0] * i1
+        + betas[1] * i2
+        + betas[2] * i3
+        + betas[3] * i4
+        + betas[4] * i5
+        + g_d * dipole
+    )
 
 
 @cuda.jit(device=True)
@@ -46,7 +73,7 @@ def gradient(dx_x, dx_y, dy_x, dy_y):
 
 
 @cuda.jit(device=True)
-def local_energy(state, r, i, j, psi, betas, K):
+def local_energy(state, r, i, j, psi, betas, K, g_d):
     """Onsite energy and the three gradient cells affected by this site."""
     L = state.shape[1]
     ip, im, jp, jm = (i + 1) % L, (i - 1) % L, (j + 1) % L, (j - 1) % L
@@ -63,7 +90,7 @@ def local_energy(state, r, i, j, psi, betas, K):
         g += gradient(state[r, ip, jm, mu, 0] - down_x,
                       state[r, ip, jm, mu, 1] - down_y,
                       x - down_x, y - down_y)
-    return potential(psi, betas) + K * g
+    return potential(psi, betas, g_d) + K * g
 
 @cuda.jit(device=True)
 def gradient_difference(state, r, i, j, proposed):
@@ -149,7 +176,7 @@ def gradient_difference(state, r, i, j, proposed):
 
 
 @cuda.jit
-def metropolis_color(state, rng_states, inverse_temperatures, color, betas, K, delta):
+def metropolis_color(state, rng_states, inverse_temperatures, color, betas, K, delta, g_d):
     col, row, r = cuda.grid(3)
     L = state.shape[1]
 
@@ -166,7 +193,7 @@ def metropolis_color(state, rng_states, inverse_temperatures, color, betas, K, d
                 psi[mu, a] = state[r, i, j, mu, a]
 
         # Only calculate the original onsite potential.
-        old_potential = potential(psi, betas)
+        old_potential = potential(psi, betas, g_d)
 
         # Same symmetric Cartesian proposal as before.
         for mu in range(3):
@@ -186,7 +213,7 @@ def metropolis_color(state, rng_states, inverse_temperatures, color, betas, K, d
                 ))
 
         # Calculate the energy difference directly.
-        delta_potential = potential(psi, betas) - old_potential
+        delta_potential = potential(psi, betas, g_d) - old_potential
         delta_gradient = gradient_difference(state, r, i, j, psi)
 
         difference = delta_potential + K * delta_gradient
