@@ -56,7 +56,7 @@ def direct_differences(state, positions, proposed, coefficients, K, output):
                 old[mu, a] = state[r, i, j, mu, a]
                 new[mu, a] = proposed[r, mu, a]
         dg = gradient_difference(state, r, i, j, new)
-        dv = potential(new, coefficients) - potential(old, coefficients)
+        dv = potential(new, coefficients, np.float32(0)) - potential(old, coefficients, np.float32(0))
         output[0, r] = dg
         output[1, r] = dv
         output[2, r] = dv + K * dg
@@ -73,8 +73,8 @@ def color_differences(state, proposed, color, coefficients, K, output):
             for a in range(2):
                 old[mu, a] = state[r, i, j, mu, a]
                 new[mu, a] = proposed[r, i, j, mu, a]
-        output[r, i, j] = (potential(new, coefficients)
-                           - potential(old, coefficients)
+        output[r, i, j] = (potential(new, coefficients, np.float32(0))
+                           - potential(old, coefficients, np.float32(0))
                            + K * gradient_difference(state, r, i, j, new))
 
 

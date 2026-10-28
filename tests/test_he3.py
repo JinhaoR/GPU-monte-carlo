@@ -15,11 +15,22 @@ from core.runtime import Runtime
 from core.simulation import Simulation
 from models.he3.analysis import He3Analysis
 from models.he3.model import He3Model
+from models.he3.sampling import He3GaussianRuntime
 from models.he3.update import local_energy
 from utils.data_io import load_runs, save_runs
 
 
-def total_energy(state, K, betas, twist=(0.0, 0.0)):
+def dipole_invariant_numpy(psi):
+    """Full 3x3 contraction with the absent orbital column set to zero."""
+    psi = np.asarray(psi, dtype=np.complex128)
+    matrix = np.zeros(psi.shape[:-2] + (3, 3), dtype=np.complex128)
+    matrix[..., :, :2] = psi
+    return (np.abs(np.trace(matrix, axis1=-2, axis2=-1))**2
+            + np.einsum("...ij,...ji->...", matrix, matrix.conj()).real
+            - (2 / 3) * np.sum(np.abs(matrix)**2, axis=(-2, -1)))
+
+
+def total_energy(state, K, betas, twist=(0.0, 0.0), g_d=0.0):
     """Evaluate the original contractions, without the GPU's local expansion."""
     psi = np.asarray(state, dtype=np.complex128)
     density = np.sum(np.abs(psi)**2, axis=(-2, -1))
@@ -33,6 +44,7 @@ def total_energy(state, K, betas, twist=(0.0, 0.0)):
         np.sum((G**2).real, axis=(-2, -1)),
     )
     potential = -2 * density + sum(b * invariant for b, invariant in zip(betas, invariants))
+    potential += g_d * dipole_invariant_numpy(psi)
     dx = np.exp(-1j * twist[0]) * np.roll(psi, -1, axis=1) - psi
     dy = np.exp(-1j * twist[1]) * np.roll(psi, -1, axis=2) - psi
     G1 = np.sum(np.abs(dx)**2 + np.abs(dy)**2, axis=(-2, -1))
@@ -42,20 +54,23 @@ def total_energy(state, K, betas, twist=(0.0, 0.0)):
     return np.sum(potential + K * (G1 + G2 + G3), axis=(1, 2))
 
 
-def reference(state, K, betas):
+def reference(state, K, betas, g_d=0.0):
     psi = np.asarray(state, dtype=np.complex128)
     phase = np.sum(psi[..., 0]**2 - psi[..., 1]**2, axis=-1)
     return {
-        "energy": total_energy(psi, K, betas),
+        "energy": total_energy(psi, K, betas, g_d=g_d),
         "density": np.sum(np.abs(psi)**2, axis=(1, 2, 3, 4)),
         "chirality": 2 * np.sum((psi[..., 0].conj() * psi[..., 1]).imag, axis=(1, 2, 3)),
         "phase_real": phase.real.sum(axis=(1, 2)),
         "phase_imag": phase.imag.sum(axis=(1, 2)),
+        "spin_alignment": 0.5 * (
+            3 * np.sum(np.abs(psi[..., 2, :])**2, axis=(1, 2, 3))
+            / np.sum(np.abs(psi)**2, axis=(1, 2, 3, 4)) - 1),
     }
 
 
 @cuda.jit
-def local_energies(state, positions, proposed, output, coefficients, K):
+def local_energies(state, positions, proposed, output, coefficients, K, g_d):
     r = cuda.grid(1)
     if r < state.shape[0]:
         i, j = positions[r, 0], positions[r, 1]
@@ -65,8 +80,8 @@ def local_energies(state, positions, proposed, output, coefficients, K):
             for alpha in range(2):
                 old[mu, alpha] = state[r, i, j, mu, alpha]
                 new[mu, alpha] = proposed[r, mu, alpha]
-        output[0, r] = local_energy(state, r, i, j, old, coefficients, K)
-        output[1, r] = local_energy(state, r, i, j, new, coefficients, K)
+        output[0, r] = local_energy(state, r, i, j, old, coefficients, K, g_d)
+        output[1, r] = local_energy(state, r, i, j, new, coefficients, K, g_d)
 
 
 class CoefficientTests(unittest.TestCase):
@@ -124,7 +139,8 @@ class He3Tests(unittest.TestCase):
                     "phase_real": n * 16, "phase_imag": 0,
                     "current_x": 0, "current_y": 0,
                     "curvature_x": 4 * float(np.float32(K)) * n * 16,
-                    "curvature_y": 4 * float(np.float32(K)) * n * 16}
+                    "curvature_y": 4 * float(np.float32(K)) * n * 16,
+                    "spin_alignment": 1}
         for name, value in expected.items():
             np.testing.assert_allclose(measured[name], value, atol=1e-6)
         run = {"metadata": {"temperatures": [0.6, 0.9], "model_parameters": model.parameters()},
@@ -132,6 +148,7 @@ class He3Tests(unittest.TestCase):
         result = He3Analysis({4: run}, block_size=2).results[4]
         np.testing.assert_allclose(result["binder_chirality"], 2 / 3, atol=1e-12)
         np.testing.assert_allclose(result["binder_phase"], 1, atol=1e-12)
+        np.testing.assert_allclose(result["spin_alignment"], 1, atol=1e-12)
         for name in ("helicity_x", "helicity_y", "helicity"):
             np.testing.assert_allclose(result[name], 4 * float(np.float32(K)) * n, atol=1e-6)
 
@@ -179,6 +196,116 @@ class He3Tests(unittest.TestCase):
             np.testing.assert_allclose(measured[f"curvature_{direction}"],
                                        (plus - 2 * energy + minus) / h**2, atol=2e-5, rtol=1e-6)
 
+    def test_dipole_energy_local_changes_and_cached_temperature_order(self):
+        state = self.random_state(L=6)
+        device = cuda.to_device(state)
+        positions = np.array(((0, 0), (0, 5), (5, 0)), dtype=np.int32)
+        proposed = self.random_state(L=4)[:, 1, 2].copy()
+        changed = state.copy()
+        for r, (i, j) in enumerate(positions):
+            changed[r, i, j] = proposed[r]
+        order = np.array([2, 0, 1], dtype=np.int32)
+        mapping = cuda.to_device(order)
+        for g_d in (0.0, 0.001, 0.1):
+            with self.subTest(g_d=g_d):
+                model = He3Model(K=0.73, pressure=20, g_d=g_d)
+                expected = reference(state, float(model.K), model.betas, float(model.g_d))
+                measured = model.measure(device)
+                for name in expected:
+                    np.testing.assert_allclose(measured[name], expected[name],
+                                               rtol=2e-6, atol=1e-5, err_msg=name)
+                energies = cuda.device_array(3, dtype=np.float64)
+                model.measure_energy(device, energies)
+                np.testing.assert_allclose(energies.copy_to_host(), expected["energy"],
+                                           rtol=2e-6, atol=1e-5)
+                for actual, indices in (
+                    (model.measure_with_energy(device, energies), np.arange(3)),
+                    (model.measure(device, mapping), order),
+                    (model.measure_with_energy(device, energies, mapping), order),
+                ):
+                    for name in measured:
+                        np.testing.assert_array_equal(actual[name][indices], measured[name])
+                local = cuda.device_array((2, 3), dtype=np.float64)
+                local_energies[1, 32](device, cuda.to_device(positions),
+                                     cuda.to_device(proposed), local,
+                                     model.betas, model.K, model.g_d)
+                local = local.copy_to_host()
+                difference = (total_energy(changed, float(model.K), model.betas,
+                                           g_d=float(model.g_d)) - expected["energy"])
+                np.testing.assert_allclose(local[1] - local[0], difference,
+                                           rtol=2e-5, atol=3e-5)
+
+    def test_spin_alignment_normalization_and_density_weighting(self):
+        state = np.zeros((5, 4, 4, 3, 2), dtype=np.complex64)
+        orbital = np.array([1, 1j], dtype=np.complex64) / np.sqrt(2)
+        state[0, ..., 2, :] = orbital
+        state[1, ..., 0, :] = orbital
+        state[2] = np.ones((3, 1)) * orbital / np.sqrt(3)
+        # Half the sites have z-directed spin with three times the density;
+        # the other half have x-directed spin. Average local Qzz would be 1/4.
+        state[3, :2, :, 2, :] = np.sqrt(3) * orbital
+        state[3, 2:, :, 0, :] = orbital
+        # The fifth replica has zero density and uses Qzz=0 by convention.
+        measured = He3Model(g_d=0.001).measure(cuda.to_device(state))
+        np.testing.assert_allclose(measured["spin_alignment"], [1, -0.5, 0, 0.625, 0],
+                                   atol=1e-7, rtol=0)
+
+    def test_both_samplers_dipole_pt_save_and_spin_analysis(self):
+        for runtime_class in (Runtime, He3GaussianRuntime):
+            for g_d in (0.0, 0.001):
+                with self.subTest(sampler=runtime_class.__name__, g_d=g_d):
+                    model = He3Model(pressure=20, g_d=g_d)
+                    runtime = runtime_class(model, 4, [0.3, 0.4, 0.6],
+                                            threads=2, seed=227)
+                    initial = runtime.snapshot()
+                    pt = ParallelTempering(runtime, exchange_interval=2, seed=228)
+                    run = Simulation(pt, thermalization_sweeps=2,
+                                     measurement_sweeps=16, sample_interval=2).run()
+                    self.assertTrue(np.isfinite(runtime.snapshot()).all())
+                    self.assertGreater(np.max(np.abs(runtime.snapshot() - initial)), 0.01)
+                    self.assertEqual(run["samples"]["spin_alignment"].shape, (8, 3))
+                    for sample in run["samples"].values():
+                        self.assertTrue(np.isfinite(sample).all())
+                    np.testing.assert_allclose(pt.measure()["energy"],
+                                               runtime.model.measure(runtime.state,
+                                                   pt.walker_to_temperature)["energy"],
+                                               rtol=2e-6, atol=1e-5)
+                    if runtime_class is He3GaussianRuntime:
+                        self.assertEqual(sum(runtime.sampling_diagnostics()[
+                            "nonfinite_rejections"]), 0)
+                    with tempfile.TemporaryDirectory() as directory:
+                        path = Path(directory) / "dipole.npz"
+                        save_runs(path, {4: run})
+                        restored = load_runs(path)[4]
+                        self.assertAlmostEqual(restored["metadata"]["model_parameters"][
+                            "g_d"], g_d, places=8)
+                        np.testing.assert_array_equal(restored["samples"]["spin_alignment"],
+                                                      run["samples"]["spin_alignment"])
+                        analysis = He3Analysis.from_file(path, block_size=2)
+                        result = analysis.results[4]
+                        np.testing.assert_allclose(result["spin_alignment"],
+                                                   run["samples"]["spin_alignment"].mean(axis=0))
+                        blocks = run["samples"]["spin_alignment"].reshape(4, 2, 3).mean(axis=1)
+                        np.testing.assert_allclose(result["spin_alignment_err"],
+                                                   blocks.std(axis=0, ddof=1) / 2)
+                        figures = analysis.plot(show=False)
+                        self.assertIn("spin_alignment", figures)
+                        self.assertEqual(figures["spin_alignment"].axes[0].get_ylabel(),
+                                         r"$Q_{zz}$")
+                        plt.close("all")
+
+    def test_legacy_analysis_omits_unrecorded_spin_alignment(self):
+        measured = He3Model().measure(cuda.to_device(self.random_state(L=4)))
+        samples = {name: np.tile(value, (8, 1)) for name, value in measured.items()
+                   if name != "spin_alignment"}
+        run = {"metadata": {"temperatures": [0.3, 0.4, 0.6]}, "samples": samples}
+        analysis = He3Analysis({4: run}, block_size=2)
+        self.assertNotIn("spin_alignment", analysis.results[4])
+        figures = analysis.plot(show=False)
+        self.assertNotIn("spin_alignment", figures)
+        self.assertEqual(len(figures), 4)
+        plt.close("all")
+
     def test_local_changes_include_all_gradient_cells(self):
         K = np.float32(0.73)
         betas = np.asarray((-0.4, 1.1, 0.8, 1.3, -0.7), dtype=np.float32)
@@ -187,7 +314,8 @@ class He3Tests(unittest.TestCase):
         proposed = self.random_state(L=4)[:, 1, 2].copy()
         output = cuda.device_array((2, 3), dtype=np.float64)
         local_energies[1, 32](cuda.to_device(state), cuda.to_device(positions),
-                             cuda.to_device(proposed), output, cuda.to_device(betas), K)
+                             cuda.to_device(proposed), output, cuda.to_device(betas),
+                             K, np.float32(0))
         local = output.copy_to_host()
         changed = state.copy()
         for r, (i, j) in enumerate(positions):
@@ -261,7 +389,7 @@ class He3Tests(unittest.TestCase):
                     np.testing.assert_array_equal(restored[L]["samples"][name], runs[L]["samples"][name])
                 for values in analysis.results[L].values():
                     self.assertTrue(np.isfinite(values).all())
-            self.assertEqual(len(analysis.plot(show=False).axes), 4)
+            self.assertEqual(len(analysis.plot(show=False)), 5)
             plt.close("all")
 
 

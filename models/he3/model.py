@@ -72,23 +72,23 @@ class He3Model(Model):
         if cached_energies is None:
             if temperature_indices is None:
                 he3_measure_kernel[R, MEASURE_THREADS](
-                    state, output, self.betas, self.K,
+                    state, output, self.betas, self.K, self.g_d,
                 )
             else:
                 he3_ordered_measure_kernel[R, MEASURE_THREADS](
                     state, output, self.betas, self.K,
-                    temperature_indices,
+                    temperature_indices, self.g_d,
                 )
         else:
             if temperature_indices is None:
                 he3_cached_measure_kernel[R, MEASURE_THREADS](
                     state, output, self.betas, self.K,
-                    cached_energies,
+                    cached_energies, self.g_d,
                 )
             else:
                 he3_ordered_cached_measure_kernel[R, MEASURE_THREADS](
                     state, output, self.betas, self.K,
-                    temperature_indices, cached_energies,
+                    temperature_indices, cached_energies, self.g_d,
                 )
 
         return dict(zip(MEASUREMENT_NAMES, output.copy_to_host()))
@@ -103,7 +103,7 @@ class He3Model(Model):
 
     def measure_energy(self, state, output):
         he3_energy_kernel[state.shape[0], MEASURE_THREADS](
-            state, output, self.betas, self.K)
+            state, output, self.betas, self.K, self.g_d)
 
     def parameters(self):
         return {"K": self.K, "betas": self.betas, "delta": self.delta,

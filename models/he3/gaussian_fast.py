@@ -89,7 +89,7 @@ def gaussian_proposal_float32(psi, field, beta, K, rho, mass, rng, index):
 
 
 @cuda.jit
-def fast_gaussian_color(state, rng, inverse_temperatures, color, coefficients, K, rho, mass, counts):
+def fast_gaussian_color(state, rng, inverse_temperatures, color, coefficients, K, rho, mass, counts, g_d):
     col, row, r = cuda.grid(3)
     L = state.shape[1]
     i, j = 2 * row + color // 2, 2 * col + color % 2
@@ -102,10 +102,10 @@ def fast_gaussian_color(state, rng, inverse_temperatures, color, coefficients, K
     for mu in range(3):
         for a in range(2):
             psi[mu, a] = state[r, i, j, mu, a]
-    old_potential = potential(psi, coefficients)
+    old_potential = potential(psi, coefficients, g_d)
     log_proposal_ratio = gaussian_proposal_float32(
         psi, field, inverse_temperatures[r], K, rho, mass, rng, index)
-    delta_h = (potential(psi, coefficients) - old_potential
+    delta_h = (potential(psi, coefficients, g_d) - old_potential
                + K * gradient_difference(state, r, i, j, psi))
     log_ratio = -inverse_temperatures[r] * delta_h + log_proposal_ratio
     u = xoroshiro128p_uniform_float32(rng, index)
@@ -141,7 +141,7 @@ class FastGaussianUpdater:
         for color in range(4):
             fast_gaussian_color[rt.blocks_per_grid, rt.threads_per_block](
                 rt.state, rt.rng_states, rt.betas, color, rt.model.betas,
-                rt.model.K, self.rho, self.mass, self.counts)
+                rt.model.K, self.rho, self.mass, self.counts, rt.model.g_d)
         self.sweeps += 1
 
     def diagnostics(self):

@@ -2,6 +2,8 @@
 
 Local fields use complex64 arithmetic; lattice sums and cached energies use
 float64. Cached energy stays in physical walker order until output scattering.
+Spin alignment is Qzz = (3 * total spin-z density / total density - 1) / 2.
+Exactly zero total density has no spin direction and is assigned Qzz = 0.
 """
 
 from numba import cuda, complex64, float64
@@ -13,6 +15,7 @@ MEASURE_THREADS = 256
 MEASUREMENT_NAMES = (
     "energy", "density", "chirality", "phase_real", "phase_imag",
     "current_x", "curvature_x", "current_y", "curvature_y",
+    "spin_alignment",
 )
 
 
@@ -20,10 +23,11 @@ MEASUREMENT_NAMES = (
 def _measure(state, output, betas, K, temperature_indices, cached_energies, g_d):
     r, tid = cuda.blockIdx.x, cuda.threadIdx.x
     L = state.shape[1]
-    shared = cuda.shared.array((9, MEASURE_THREADS), dtype=float64)
+    shared = cuda.shared.array((10, MEASURE_THREADS), dtype=float64)
     psi = cuda.local.array((3, 2), dtype=complex64)
     energy, density, chirality, pr, pi = 0.0, 0.0, 0.0, 0.0, 0.0
     ix, kx, iy, ky = 0.0, 0.0, 0.0, 0.0
+    spin_z_density = 0.0
     for site in range(tid, L * L, cuda.blockDim.x):
         i, j = site // L, site % L
         for mu in range(3):
@@ -39,7 +43,10 @@ def _measure(state, output, betas, K, temperature_indices, cached_energies, g_d)
             a, b, c, d = xp_x - x, xp_y - y, yp_x - x, yp_y - y
             if cached_energies is None:
                 energy += K * gradient(a, b, c, d)
-            density += norm2(x) + norm2(y)
+            row_density = norm2(x) + norm2(y)
+            density += row_density
+            if mu == 2:
+                spin_z_density += row_density
             chirality += 2 * (x.conjugate() * y).imag
             phase = x * x - y * y
             pr += phase.real
@@ -56,11 +63,12 @@ def _measure(state, output, betas, K, temperature_indices, cached_energies, g_d)
     shared[3, tid], shared[4, tid] = pr, pi
     shared[5, tid], shared[6, tid] = ix, kx
     shared[7, tid], shared[8, tid] = iy, ky
+    shared[9, tid] = spin_z_density
     cuda.syncthreads()
     stride = cuda.blockDim.x // 2
     while stride > 0:
         if tid < stride:
-            for channel in range(9):
+            for channel in range(10):
                 shared[channel, tid] += shared[channel, tid + stride]
         cuda.syncthreads()
         stride //= 2
@@ -75,6 +83,10 @@ def _measure(state, output, betas, K, temperature_indices, cached_energies, g_d)
         # All remaining observables use the regular reduction.
         for channel in range(1, 9):
             output[channel, destination] = shared[channel, 0]
+        if shared[1, 0] == 0.0:
+            output[9, destination] = 0.0
+        else:
+            output[9, destination] = 0.5 * (3 * shared[9, 0] / shared[1, 0] - 1)
 
 
 @cuda.jit

@@ -29,12 +29,15 @@ class He3Analysis:
     def _estimate(self, L, m):
         hx = (m["kx"] - (m["ix2"] - m["ix"]**2) / self.temperatures) / L**2
         hy = (m["ky"] - (m["iy2"] - m["iy"]**2) / self.temperatures) / L**2
-        return np.stack((
+        values = (
             m["energy"], m["density"], m["chirality"], np.sqrt(m["phase2"]),
             1 - m["chi4"] / (3 * m["chi2"]**2),
             2 - m["phase4"] / m["phase2"]**2,
             hx, hy, 0.5 * (hx + hy),
-        ))
+        )
+        if "spin_alignment" in m:
+            values += (m["spin_alignment"],)
+        return np.stack(values)
 
 
     def fit_wm(self, temperature_range=None, q=0.5):
@@ -103,9 +106,14 @@ class He3Analysis:
                 "iy": s["current_y"], "iy2": s["current_y"]**2,
                 "ky": s["curvature_y"],
             }
+            names = OBSERVABLES
+            if "spin_alignment" in s:
+                # The saved Qzz is already normalized for each configuration.
+                moments["spin_alignment"] = s["spin_alignment"]
+                names += ("spin_alignment",)
             values, errors = blocked_jackknife(
                 moments, lambda m: self._estimate(L, m), self.block_size)
-            results[L] = {key: array for name, value, error in zip(OBSERVABLES, values, errors)
+            results[L] = {key: array for name, value, error in zip(names, values, errors)
                           for key, array in ((name, value), (name + "_err", error))}
         return results
 
@@ -131,6 +139,8 @@ class He3Analysis:
                 r"$n$",
             ),
         }
+        if any("spin_alignment" in result for result in self.results.values()):
+            observables["spin_alignment"] = ("Spin alignment", r"$Q_{zz}$")
 
         colors = [
             "#4C78A8",
@@ -148,6 +158,8 @@ class He3Analysis:
 
             for index, L in enumerate(self.sizes):
                 result = self.results[L]
+                if name == "spin_alignment" and name not in result:
+                    continue
                 color = colors[index % len(colors)]
 
                 y = result[name]
