@@ -5,6 +5,7 @@ from core.parallel_tempering import ParallelTempering
 from core.simulation import Simulation
 
 from models.he3.model import He3Model
+from models.he3.sampling import He3GaussianRuntime
 
 from utils.data_io import save_runs
 from utils.temperature_ladder import make_temperature_ladder
@@ -40,7 +41,17 @@ def main():
             reduced_temperature=reduced_temperature,
         )
 
-        runtime = Runtime(
+        # Choose sampling method
+        sampler = "gaussian"  # "cartesian" or "gaussian"
+
+        # Inside your existing loop over L
+        runtime_class = (
+            He3GaussianRuntime
+            if sampler == "gaussian"
+            else Runtime
+        )
+
+        runtime = runtime_class(
             model=model,
             L=L,
             temperatures=temperatures,
@@ -58,14 +69,21 @@ def main():
 
         simulation = Simulation(
             runtime=pt,
-            thermalization_sweeps=300000,
+            thermalization_sweeps=100000,
             measurement_sweeps=500000,
             sample_interval=10,
         )
 
-        runs[L] = simulation.run()
+        run = simulation.run()
 
-    data_path = Path("data/he3_run.npz")
+        if sampler == "gaussian":
+            run["metadata"]["sampling"] = (
+                runtime.sampling_diagnostics()
+            )
+
+        runs[L] = run
+
+    data_path = Path(f"data/he3_{sampler}_run.npz")
 
     save_runs(data_path, runs)
 
