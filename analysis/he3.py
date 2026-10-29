@@ -16,12 +16,18 @@ from utils.data_io import load_runs
 # SETTINGS
 # ============================================================
 
+pressure = 20.0
+g_d = 0.01
+sampler = "gaussian"
+
+folder = f"P={pressure:g}_gd={g_d:g}_{sampler}"
+
 # Input files
-input_dir = Path("data")
-file_pattern = "he3_gd=0.001_P=20_L=*_run.npz"
+input_dir = Path("data/he3") / folder
+file_pattern = "L=*.npz"
 
 # Output
-output_dir = Path("analysis_results/he3/gd=0.001_P=20")
+output_dir = Path("analysis_results/he3") / folder
 figure_dpi = 170
 
 # Analysis sections
