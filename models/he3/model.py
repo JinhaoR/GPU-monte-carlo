@@ -49,6 +49,15 @@ class He3Model(Model):
             raise ValueError("g_d must be finite and nonnegative")
         self.g_d = np.float32(g_d)
 
+        # Optional exploration: every Nth scalar measurement also records spatial data.
+        self.spatial_every = 0
+        self.spatial_samples = []
+        self.realspace_every = 0
+        self.realspace_indices = []
+        self.realspace_samples = []
+        self._measurement_count = 0
+        self._spatial_meter = None
+
     def initialize_state(self, L, replicas, seed):
         state = np.zeros((replicas, L, L, 3, 2), dtype=np.complex64)
         # A homogeneous positive-chirality minimum: d=(0,0,1), theta=0.
@@ -91,7 +100,34 @@ class He3Model(Model):
                     temperature_indices, cached_energies, self.g_d,
                 )
 
-        return dict(zip(MEASUREMENT_NAMES, output.copy_to_host()))
+        result = dict(zip(MEASUREMENT_NAMES, output.copy_to_host()))
+        if self.spatial_every or self.realspace_every:
+            self._measurement_count += 1
+            if self.spatial_every and self._measurement_count % self.spatial_every == 0:
+                from .measure_spatial import SpatialMeter
+                if self._spatial_meter is None:
+                    self._spatial_meter = SpatialMeter(state.shape[1], R)
+                amplitudes = self._spatial_meter.measure(state, temperature_indices)
+                structure = self._spatial_meter.structure(state, self, temperature_indices)
+                walkers = (np.arange(R, dtype=np.int32) if temperature_indices is None
+                           else np.argsort(temperature_indices.copy_to_host()).astype(np.int32))
+                self.spatial_samples.append(
+                    (self._measurement_count - 1, amplitudes, structure, walkers)
+                )
+            if self.realspace_every and self._measurement_count % self.realspace_every == 0:
+                from .spatial import compact_correlations
+                walkers = (np.arange(R, dtype=np.int32) if temperature_indices is None
+                           else np.argsort(temperature_indices.copy_to_host()).astype(np.int32))
+                indices = np.asarray(self.realspace_indices, dtype=np.int32)
+                profiles, means = [], []
+                for walker in walkers[indices]:
+                    c = compact_correlations(state[int(walker)].copy_to_host())
+                    stop = state.shape[1] // 2 + 1
+                    profiles.append(np.stack((c['x'][:7, :stop], c['y'][:7, :stop]), axis=1))
+                    means.append(c['means'][:7])
+                self.realspace_samples.append((self._measurement_count - 1,
+                    np.stack(profiles), np.stack(means), walkers[indices], indices.copy()))
+        return result
 
     def measure_with_energy(self, state, energies, temperature_indices=None):
         return self.measure(

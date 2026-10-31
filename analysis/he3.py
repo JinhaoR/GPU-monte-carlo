@@ -7,6 +7,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 from models.he3.analysis import He3Analysis
+from models.he3.spatial_analysis import summarize_spatial, summarize_realspace
 from utils.Analysis.parallel_tempering import PTAnalysis
 from utils.Analysis.joint_histogram import joint_histogram, plot_joint_histogram
 from utils.data_io import load_runs
@@ -34,6 +35,10 @@ figure_dpi = 170
 run_pt = True
 run_joint = True
 run_thermo = True
+run_spatial = False
+spatial_block_size = 200  # spatial events, separate from scalar block_size
+run_realspace = False
+realspace_block_size = 10  # profile events
 
 # Joint distributions
 joint_L = 96
@@ -77,6 +82,20 @@ def main():
         print(f"Loaded: {path}")
 
     runs = dict(sorted(runs.items()))
+
+    if run_spatial:
+        output_dir.mkdir(parents=True, exist_ok=True)
+        for L, run in runs.items():
+            result = summarize_spatial(run, spatial_block_size)
+            if result is not None:
+                np.savez_compressed(output_dir / f"spatial_L={L}.npz", **result)
+
+    if run_realspace:
+        output_dir.mkdir(parents=True, exist_ok=True)
+        for L, run in runs.items():
+            result = summarize_realspace(run, realspace_block_size)
+            if result is not None:
+                np.savez_compressed(output_dir / f"realspace_L={L}.npz", **result)
 
     figures = {}
     report = [
