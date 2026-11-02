@@ -43,7 +43,7 @@ def metropolis_color(state, rng_states, betas, color, J, delta):
         if dE <= 0 or u < math.exp(-betas[r] * dE):
             theta, energy = proposed_theta, proposed_energy
 
-        proposed_tau = one if xoroshiro128p_uniform_float32(rng_states, index) < float32(0.5) else -one
+        proposed_tau = -tau
         proposed_energy = local_energy(state, r, i, j, theta, proposed_tau, dx, dy, dz, J)
         dE = proposed_energy - energy
         u = xoroshiro128p_uniform_float32(rng_states, index)

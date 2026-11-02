@@ -17,13 +17,13 @@ from utils.data_io import load_runs
 # ============================================================
 
 pressure = 20.0
-g_d = 0.01
+g_d = 0
 sampler = "gaussian"
 
 folder = f"P={pressure:g}_gd={g_d:g}_{sampler}"
 
 # Input files
-input_dir = Path("data/he3") / folder
+input_dir = Path("data/weak_soc_spatial_simple_01") / folder
 file_pattern = "L=*.npz"
 
 # Output
