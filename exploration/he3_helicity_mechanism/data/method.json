@@ -1,0 +1,24 @@
+{
+  "source": "soc_scan_02",
+  "K": 1,
+  "N": "L^2",
+  "base_cache_records": 100,
+  "saved_record_sweeps": 50,
+  "default_block_records": 2000,
+  "production_records": 60000,
+  "center_index": {
+    "0": 71,
+    "0.001": 71,
+    "0.01": 76
+  },
+  "primary_halfwidth": 3,
+  "uncertainty": "paired delete-one joint PT time-block jackknife, conditional on sampled histories",
+  "identities": [
+    "Y=D-S",
+    "D=<Kx+Ky>/(2N)",
+    "S=(Var(Ix)+Var(Iy))/(2TN)",
+    "M=(<Ix>^2+<Iy>^2)/(2TN)",
+    "D=4<n> R, R=D/(4<n>)",
+    "Delta D=4 R_mid Delta<n> + 4 n_mid Delta R"
+  ]
+}

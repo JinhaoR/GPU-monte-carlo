@@ -1,0 +1,192 @@
+{
+  "head": "8376ae0fa6c8feb7e0b8aa71446cff1eb43a2d46",
+  "branch": "exploration/he3-soc-analysis",
+  "status": "?? exploration/he3_hqv_stage1/.gitignore\n?? exploration/he3_hqv_stage1/results/\n?? exploration/he3_hqv_stage2/.gitignore\n?? exploration/he3_hqv_stage2/results/\n?? exploration/he3_hqv_stage3/.gitignore\n?? exploration/he3_hqv_stage3/results/\n?? exploration/he3_soc/.gitignore\n?? exploration/he3_soc/results/\n?? exploration/he3_spatial_pilot/.gitignore\n?? exploration/he3_spatial_pilot/results/\n?? exploration/he3_transition_study/.gitignore\n?? exploration/he3_transition_study/results/\n?? exploration/he3_weak_soc_preparation/ladders/\n?? exploration/he3_weak_soc_preparation/results/\n?? \"patial simulation campaign\\357\\200\\242\"\n",
+  "code": {
+    "run.py": "00fae1434933ae1bb50b0eed96beb78ea5811ab67d15dce3ce26d0b1d94f0f36",
+    "test_spin.py": "3aa222ec327f6f587946a4d5ca6856674701a17f23a16c1f51391a338eb19771",
+    "analysis\\he3.py": "40469deabe1d4fdac474c705c6a8dac9336f787f61ff26d15eb456e32f222530",
+    "analysis\\ising.py": "be0c9930c4c351080c7e3d84e1fbbdca49c8608ade6a4f8d4af6224430e12c93",
+    "analysis\\xy.py": "f6c53fd36c98a60b0bd457390441d5faca515eab4408598c9eda36c9ce309c94",
+    "core\\model.py": "e885e7b74d55a2013f24b5b06b0be33fb55301be9d732df1e6fe66340fc10398",
+    "core\\parallel_tempering.py": "e17ba13e0d6c8168ef5fd236538c3c06f0fa50997f27487cd87a344bc09507c9",
+    "core\\runtime.py": "333a1ec6204b1560cd8e1410cce8fcdb60dec94172ee7778f9313e89af503d5f",
+    "core\\simulation.py": "56aabe11af5bf1ecef5d14dfe64321005420b5ed1ad35c298f5a9094056bae2d",
+    "main\\he3.py": "270d1be443abc13a7f194a1a4b4db3c8e98e8716fbcc825110f4d28d8581f331",
+    "main\\ising.py": "d3d73e62961eb6cc3e2ffd7c86f79d05f4bb2527d4597fb5b93ce3da352e7ec6",
+    "main\\kawamura.py": "0582d4ba7650ddcf71c9ff616c7e38fc15d3d1eb60a0cae20cc36dd0da79faca",
+    "main\\xy.py": "2080a8edb6cc49ba913fe391c1d1c9ba64b8047de7fc8fbdf738109a713b73d3",
+    "profiling\\profile_he3.py": "f40285182e7bda4dc929fa855b6ccb605c9dd16ef6921d83c40f1a69f262160e",
+    "tests\\test_analysis_statistics.py": "5a1b66d71f894ca38e97c18437f48311190f66c09aa517ac1489f5b8362c3db2",
+    "tests\\test_analyze_cli.py": "ba9c9572e080d931125c076d89aee9a3de70ec14dab071bb618a9fd88e9634a5",
+    "tests\\test_bkt.py": "47fe9ff8f2c7c9a25a1c14b431849b9601366f8fee0da7ede56781a503656e84",
+    "tests\\test_crossings.py": "0907d7b80cda79685ade82a002f70e080a15b45f0967fee4c10cf3461b133ece",
+    "tests\\test_energy_cache.py": "dfa02e39b5df8ae1d467edade9ceb10cc6504126da8a9c2045ab82d6de23e7a0",
+    "tests\\test_he3.py": "e5f9412e8948411e9b8bf24919f11e511ff453835d601fd53311d3cbaf2fd424",
+    "tests\\test_he3_energy_difference.py": "7675ae285c6a3cd0b65ae6dbafa2f36573510b227cb27a57431b502b9692435b",
+    "tests\\test_he3_workflows.py": "4c5196181df71c32fda2ea63ce3fb4220089941dc7050c6e81e9421fff720fda",
+    "tests\\test_ising_analysis.py": "480074590b3151f8c10c0d92db92747ea93478256fcf92e2fae9cb59f55c16bb",
+    "tests\\test_kawamura.py": "89bd2ca9e0274af08046f4ce9bee631c5dba6f26c4546a339975ef9f5897e768",
+    "tests\\test_parallel_tempering.py": "26ed9d8814eefb9efadf1d51c882393206f9e406793b9df55a02d6048f0246ab",
+    "tests\\test_pt_analysis.py": "8a619f61e29965d612930abdcac824acd2153c9672d728d030ee0b3bd65f7a07",
+    "tests\\test_pt_walkers.py": "f5c9bfb5c22b220201455e9b71a23ed11b0fbfe1fd341108627833b71f510fdf",
+    "tests\\test_simulation.py": "0086e21acb3b7f3c40d740b376e3e9ed25caa184432d07f6d4daaa831e2828a3",
+    "tests\\test_xy_analysis.py": "cb2ab735f918a7f3b716a62c52bc74b3e3d79cea7c047791cb31989517905a5f",
+    "utils\\data_io.py": "6c4f1383c5381f842039a308e60125832e2ef18bf258c0f607db2fa5caaba6ad",
+    "utils\\temperature_ladder.py": "895473cc6a7859016add277b896f6c20e18319c5f641f85464385edd377cbde5",
+    "exploration\\he3_hqv_stage1\\check_algebra.py": "f13d24c5434871860ea786b143493671090c4016a4e632fc5c681ff190646ed4",
+    "exploration\\he3_hqv_stage1\\defects.py": "81f9e842be412491859db523703463f58a3d57b9ec3194615a43d1e3e91661c3",
+    "exploration\\he3_hqv_stage1\\demo.py": "75fec433b5d1a95602a3f4ded855988765b261be8d6dc0220d675e8d4bf3f514",
+    "exploration\\he3_hqv_stage1\\synthetic.py": "004caf6021aae30a68ac848b20f1a29e150cd5928c0fb9edd1af3c7fd7c1bdfd",
+    "exploration\\he3_hqv_stage1\\test_stage1.py": "00cee676148763211a0b65cdf3ba735b9fa6a60a7a4ea5d1c7f6dea88ec7cb6e",
+    "exploration\\he3_hqv_stage2\\energy.py": "00a5fca2a6f37cd320f482b9072ea0d80662a3348ad8d2bc4143a8c2dd3e8da9",
+    "exploration\\he3_hqv_stage2\\geometry_diagnostics.py": "ae8bf24f2cb7e6f19a17a2985e86cc17714660b1c45d6a16236666e6812ed36a",
+    "exploration\\he3_hqv_stage2\\pair_baseline.py": "a61e101d6c95588d6dabc166bf900d5da7f3ddee9e3e32bd3fc6248aa7983bdf",
+    "exploration\\he3_hqv_stage2\\pilot.py": "e953a9e8b228b607985a6a5eb6a70e0972b54e9460820a8c0b4034e2f4723462",
+    "exploration\\he3_hqv_stage2\\pilot_checks.py": "531a46bba6fb72dcb8712e02c7413bf818b6eff3fc48a8e5fc83b0bdcf1bc1c3",
+    "exploration\\he3_hqv_stage2\\thermal_analysis.py": "2711160465fc85bf3d28e3ae473194bc66e2cfad8c116254a31c39f2c62d7c6d",
+    "exploration\\he3_hqv_stage3\\additional_checks.py": "0a22675367bfca7e01b733148e4d4f55c6b8bae5bd016439c166cccc43541d7e",
+    "exploration\\he3_hqv_stage3\\analyze.py": "cd60547ccde75d47c931bc87435b58294e74b46a60a4f4eb30a8a6b68165892b",
+    "exploration\\he3_hqv_stage3\\relax.py": "71b50f5b25a05158d9be0e0764462a514d3593f32fa0ad15512e68b84d3849c7",
+    "exploration\\he3_hqv_stage3\\run_cases.py": "93c49389e0cb369f3393f28b0d8e7cb3fd9e730f1ec306439c553aa1b1f6e2fb",
+    "exploration\\he3_hqv_stage3\\run_extensions.py": "17571b7a6a139939186871b82eb8f94a9ea3a1b8a937b78dfabcea4d7f5db3b7",
+    "exploration\\he3_hqv_stage3\\validate.py": "c17ece8eacf6b08513b29ec15840f27d746c7203b87c8f4078cc2c0b0d21ede6",
+    "exploration\\he3_hqv_stage3\\verify.py": "e83d7cda112b47bb541df3a146abaf5342403ed02834ac6bfead66741c5af198",
+    "exploration\\he3_soc\\bkt_checks.py": "8c176a144c35662beba30ad3e04d37680401e1052136e18d9a095c8a03d006d0",
+    "exploration\\he3_soc\\compare.py": "9c43103fcdddedf4a38c4149937c9af0c0b12229f26d0065b458cc344566621d",
+    "exploration\\he3_soc\\interpolation_checks.py": "b954d1e5e95046909ea652e90fb340f1f867c7ac1e0ff7e3902f13e40bbac9a1",
+    "exploration\\he3_soc\\local_potential.py": "52b346a81d313df53aba09fcdb931b5072f721b135a15f563711db13a967f13e",
+    "exploration\\he3_soc\\ordering_checks.py": "9fa3f1374b09f20f93257c1ede15827a2970dd5e6d10eb9826ad3c545de7daa6",
+    "exploration\\he3_soc\\pt_diagnostics.py": "9df52949a4512a72a0c7dea3f41879d423b6722b5394fdaaca3a70aa4c919830",
+    "exploration\\he3_soc\\strong_soc.py": "a3c9d62780446a873150e14f5ce496beb8b74c332b08a6a330eb67648579938c",
+    "exploration\\he3_soc\\summarize.py": "9858c46bbff570fe1096df7ccf0139b86e8170ab3a19cc3e5cc132b333d51bcb",
+    "exploration\\he3_soc\\validate.py": "99243757f3037081efcf6198c8eff45fd7b17b4ffcbeaed9aee33b6ec0c279e8",
+    "exploration\\he3_spatial_pilot\\analyze.py": "ae4232a2c6314a8b411c542627fca8ac667013d82af4af3d3e10fe374111f443",
+    "exploration\\he3_spatial_pilot\\benchmark.py": "2ac960dd432e0bf9699f21ce73cb127d94bb792fd5518e3e2d05f87e333707e9",
+    "exploration\\he3_spatial_pilot\\check_saved.py": "6e3a4ecd7a278a6554f0ff60485a02b9cdae6a5b7a511fdbd425b83f88266ebb",
+    "exploration\\he3_spatial_pilot\\figures.py": "134d5fb7d562e28c096a3266f288ef6625cf1e9809d1bc1a29e0191f10101195",
+    "exploration\\he3_spatial_pilot\\gpu_measure.py": "77376fb48ad1a2aeaf1e5c51639f5bcee5e19a2ef6b7dd69a2d8602b7d4ae24c",
+    "exploration\\he3_spatial_pilot\\ladder.py": "dd6a2b68d2122ed98c1df068d4a13098023637d62189bea7852138bf04faa4d1",
+    "exploration\\he3_spatial_pilot\\observables.py": "ab4403fe3b5b36890d16428d42790362d9bd15d00911564cd77520861915d831",
+    "exploration\\he3_spatial_pilot\\pilot.py": "742dffd6d5aceb94a51cab581a392954feef6b2b6b946d8466718bcbd6bc78f2",
+    "exploration\\he3_spatial_pilot\\validate.py": "7fee9d88427f12bc681e08530a8eb8108eda51d999e43c16c001979cbdbf1a1e",
+    "exploration\\he3_transition_study\\checks.py": "06f62dd2f33b08356101abcd77abb09cfa4e8d39a3208725c4fda66c3814f709",
+    "exploration\\he3_transition_study\\figures.py": "9b560573f6cc4b3c187be1b8ef72e9f4d0ab472c3ef8ce5ca8e119ed73eda167",
+    "exploration\\he3_transition_study\\prepare.py": "3a6428796c820f82be4dc7a0b9e29c2cb7a5a417047b3624af85d28a886b67f1",
+    "exploration\\he3_transition_study\\proposal.py": "9490f526bcb4658cdd0226daea64a4c915656b04e39a87cda3d3268725eb419b",
+    "exploration\\he3_transition_study\\reference.py": "83c8cc19257e6efcd4c7e2bf57bf07085bcd7c5d48f193f11adcffc4f3eeec06",
+    "exploration\\he3_transition_study\\reweight.py": "985be6d5b395f7d880904737887dc2876f2ed9ce36ea6059b639eabf657f7632",
+    "exploration\\he3_transition_study\\scaling.py": "d38a739d81b961bcdb6db92421fb2be1018b7b188e877f0c4131848586002b0b",
+    "exploration\\he3_transition_study\\study.py": "91c310b22f8f40a672caf47800c2762b29c26d24a948eeb2340dc56e9e000a9c",
+    "exploration\\he3_weak_soc_preparation\\benchmark.py": "21b56dd2bbba1062f3038ab815a1f17f2eb495f31fbea9aadf42041934c934ee",
+    "exploration\\he3_weak_soc_preparation\\integration.py": "c9ae7b2f6380a25928c9f1bd4d11fb04d815eae65a3871f21e5227775280b90b",
+    "exploration\\he3_weak_soc_preparation\\ladder.py": "c6580c08464dce7bfdb8285596f6bf48d1698be78785763c20068b89a284b05a",
+    "exploration\\he3_weak_soc_preparation\\live_check.py": "4e8a8c0000ad6167e5f36c648b47757efa3e729791acc40a41f7194ae097b35e",
+    "exploration\\he3_weak_soc_preparation\\validate.py": "11ab659a7d08eb3f2d78a15666a691c0248342fdfdf19594cb60c28e14be289b",
+    "models\\he3\\analysis.py": "e0c1b488403cb7441b97bfbf16aee1962e9ee5c51d41784c85e34de0570380c0",
+    "models\\he3\\gaussian_fast.py": "e7534e2cb9ab2d363c2cfaf1ab1832c875c332b8a2b5b6da61178074ffd6289d",
+    "models\\he3\\measure.py": "9e480464af1e462140b45cde696b765fe38a3bc8adca4174462870b4a948b1b2",
+    "models\\he3\\measure_spatial.py": "147101fe6594d47e8fe2749ed4b9f0b5568f7358bd099671882ab22256a4a0ee",
+    "models\\he3\\model.py": "d32b711078a39e1b8a1cdee187915a41e3828eb9c377ff4d8d7f608aa251c434",
+    "models\\he3\\sampling.py": "b9ed3a747c8bd4126cc91a89a1d1ebc744507bea315134932ef156885c5eff51",
+    "models\\he3\\spatial.py": "ca7a0e60bb322cae8650fbb067611388fc3ac09919e8f4aeb1dcb8d2e3555bb5",
+    "models\\he3\\spatial_analysis.py": "7b4b070c38ad002520a531b8f18ffecdd64a8bd8b754d4fa6f35380d5b881619",
+    "models\\he3\\update.py": "233c4386810b21d1342833433b56576b8aba7062a0c45fe3f735b8d786fba242",
+    "models\\ising\\analysis.py": "4074848e3c3f6a0df924c48b30ac6fd70fc5a43e5349d75096895ed0fdc13ec5",
+    "models\\ising\\measure.py": "affc081870c84d92cbad58010168d084875ae0e2d0ff64571092a6a94117cfd3",
+    "models\\ising\\model.py": "f41ce960615a7c7d5610f8ca306f61dcbfb34e1446a33a31d0f42f8544e6daae",
+    "models\\ising\\update.py": "ed5595a260794a7e987a76fda09a9fb3c636958ec4bb6a81817ca8dc79620b74",
+    "models\\kawamura\\analysis.py": "630fbd58f84354ee441eaf9983b796192010f1f6e646a53032e9653ece31058b",
+    "models\\kawamura\\measure.py": "db60924399141bd22174b81396caaa594b1cb1fa19a7b99c1247d3d96e699ece",
+    "models\\kawamura\\model.py": "f3963f7294223c7ea6b7bcdba4fc1101d6c6ae6bb157cde9053cfe190bd3f05b",
+    "models\\kawamura\\update.py": "b1a43e58bd6f0822d49f326bad2d0164846cef86b111bf44ac224501ba8ddce0",
+    "models\\xy\\analysis.py": "c1c92fd830c25555c1e9985cedd2669a924da12e7181d80a5fe085392269a286",
+    "models\\xy\\measure.py": "822109bd748c803d9f705c032dec9da13b9d41e94eefe9fd60a5774a7fe2acee",
+    "models\\xy\\model.py": "c62c6e14dd13f0e080584211b322128c343699b1e935236219c59b8198b76535",
+    "models\\xy\\update.py": "57af090b28c1d4d71c3c858477f0d7d950edde237a7b871e42546fe466371bcf",
+    "utils\\Analysis\\binder.py": "a3703e4b85be7ed9a01ccec286764930badb80ecf8532e229cf6b94df441dc48",
+    "utils\\Analysis\\bkt.py": "612c8c471f320b386e8b8cd0b1cfd42eb6a944899d3ab2592f03421286f9ca94",
+    "utils\\Analysis\\crossings.py": "31aab7a5439cd92094c03a5439440cc813fa941c0d939580e168ea6558973d53",
+    "utils\\Analysis\\joint_histogram.py": "16245bce1c511831a03adfc460d774d1fc957a9b36fa39e671f4898856ea6317",
+    "utils\\Analysis\\parallel_tempering.py": "4a08a494992df741bb7baaa469bd688b5919648b0e17ce51c5f04419a82dd82e",
+    "utils\\Analysis\\statistics.py": "65520335652fd2b8d11902cf76b7167689d96426b543a76e6dceaf539ceb6a39"
+  },
+  "data": {
+    "data\\ising_run.npz": {
+      "size": 60156857,
+      "mtime_ns": 1793106971210231000
+    },
+    "data\\kawamura_run.npz": {
+      "size": 2428622,
+      "mtime_ns": 1792596023149941700
+    },
+    "data\\xy_run.npz": {
+      "size": 299976083,
+      "mtime_ns": 1792515249307251100
+    },
+    "data\\he3\\P=20_gd=0.001_gaussian\\L=128.npz": {
+      "size": 715552493,
+      "mtime_ns": 1793267394182746700
+    },
+    "data\\he3\\P=20_gd=0.001_gaussian\\L=160.npz": {
+      "size": 718691206,
+      "mtime_ns": 1793267357465741700
+    },
+    "data\\he3\\P=20_gd=0.001_gaussian\\L=64.npz": {
+      "size": 703319714,
+      "mtime_ns": 1793267322328585800
+    },
+    "data\\he3\\P=20_gd=0.001_gaussian\\L=96.npz": {
+      "size": 710650764,
+      "mtime_ns": 1793267280897485500
+    },
+    "data\\he3\\P=20_gd=0.01_gaussian\\L=128.npz": {
+      "size": 715745714,
+      "mtime_ns": 1793267104617590300
+    },
+    "data\\he3\\P=20_gd=0.01_gaussian\\L=160.npz": {
+      "size": 718789645,
+      "mtime_ns": 1793267241078682500
+    },
+    "data\\he3\\P=20_gd=0.01_gaussian\\L=64.npz": {
+      "size": 703571630,
+      "mtime_ns": 1793267209190934100
+    },
+    "data\\he3\\P=20_gd=0.01_gaussian\\L=96.npz": {
+      "size": 710938064,
+      "mtime_ns": 1793267170178242600
+    },
+    "data\\he3\\P=20_gd=0.1_gaussian\\L=128.npz": {
+      "size": 713352607,
+      "mtime_ns": 1793266936431035800
+    },
+    "data\\he3\\P=20_gd=0.1_gaussian\\L=160.npz": {
+      "size": 716573102,
+      "mtime_ns": 1793266972089593900
+    },
+    "data\\he3\\P=20_gd=0.1_gaussian\\L=64.npz": {
+      "size": 697984073,
+      "mtime_ns": 1793267009789857100
+    },
+    "data\\he3\\P=20_gd=0.1_gaussian\\L=96.npz": {
+      "size": 707831437,
+      "mtime_ns": 1793267055720106000
+    },
+    "data\\he3\\P=20_gd=0_gaussian\\L=128.npz": {
+      "size": 715748328,
+      "mtime_ns": 1793267538598725500
+    },
+    "data\\he3\\P=20_gd=0_gaussian\\L=160.npz": {
+      "size": 718997529,
+      "mtime_ns": 1793267500338818400
+    },
+    "data\\he3\\P=20_gd=0_gaussian\\L=64.npz": {
+      "size": 703225358,
+      "mtime_ns": 1793267463548210400
+    },
+    "data\\he3\\P=20_gd=0_gaussian\\L=96.npz": {
+      "size": 710658430,
+      "mtime_ns": 1793267430239409100
+    }
+  }
+}

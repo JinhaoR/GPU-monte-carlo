@@ -1,0 +1,26 @@
+{
+  "branch": "exploration/he3-soc-analysis",
+  "head": "8376ae0fa6c8feb7e0b8aa71446cff1eb43a2d46",
+  "old_source_hashes_checked": 122,
+  "changed_old_sources": [],
+  "old_input_stats_checked": 27,
+  "changed_input_stats": [],
+  "syntax_checked": [
+    "analyze_pilots.py",
+    "figures.py",
+    "pilot.py",
+    "verify_pilots.py",
+    "landscape\\harmonic.py",
+    "landscape\\onsite.py",
+    "symmetry\\check_symmetry.py",
+    "transport\\reconstruct.py",
+    "transport\\review_pilots.py"
+  ],
+  "missing_links": [],
+  "tracked_diff": "",
+  "staged_diff": "",
+  "output_bytes": 198325217,
+  "figures": 13,
+  "report_words": 4886,
+  "completed_local_pilots": 15
+}

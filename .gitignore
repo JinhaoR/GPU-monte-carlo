@@ -1,2 +1,40 @@
 /data/
 /analysis_results/
+
+# Generated analysis and profiling output, wherever an experiment saves it.
+results/
+figures/
+pilot_results/
+
+# Exploratory tables and plots also saved outside results/ directories.
+/exploration/**/*.csv
+/exploration/**/*.png
+/exploration/**/*.pdf
+/exploration/**/*.svg
+
+# Simulation data, snapshots and checkpoints (keep them locally/on the cluster).
+*.npz
+*.npy
+*.h5
+*.hdf5
+
+# Python/Numba caches and local environments.
+__pycache__/
+*.py[cod]
+*.nbc
+*.nbi
+.pytest_cache/
+.venv/
+venv/
+
+# Profiling captures and run/batch logs.
+*.nsys-rep
+*.ncu-rep
+*.sqlite
+*.sqlite-wal
+*.sqlite-shm
+*.log
+slurm-*.out
+he3-*.out
+
+# Keep source, reports and text inputs, including the frozen ladder files.

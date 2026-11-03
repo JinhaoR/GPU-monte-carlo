@@ -1,0 +1,16 @@
+[
+  {
+    "L": 8,
+    "seconds_per_sweep": 0.0007791649122805382,
+    "loop_seconds": 0.31088679999993474,
+    "estimated_bytes": 8352512,
+    "initial_energy_max_error_per_site": 2.2596749138514838e-08
+  },
+  {
+    "L": 16,
+    "seconds_per_sweep": 0.00022223358396251825,
+    "loop_seconds": 0.08867120000104478,
+    "estimated_bytes": 8758016,
+    "initial_energy_max_error_per_site": 2.2596748694425628e-08
+  }
+]

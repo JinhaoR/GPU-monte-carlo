@@ -1,0 +1,49 @@
+{
+  "energy_max_error": 8.881784197001252e-15,
+  "gradient_richardson_max_error": 9.696460301356069e-11,
+  "hessian_richardson_max_error": 1.6490275811520405e-10,
+  "dipole_eigenvalues": [
+    -1.6666666865348816,
+    -1.6666666865348816,
+    -0.6666666865348816,
+    -0.6666666865348816,
+    -0.6666666865348816,
+    -0.6666666865348816,
+    0.33333331346511835,
+    0.33333331346511835,
+    0.33333331346511846,
+    0.33333331346511846,
+    2.3333333134651184,
+    2.3333333134651184
+  ],
+  "beta_A": 0.6685707569122314,
+  "beta_P": 0.7825489640235901,
+  "beta_polar": 1.1395874619483948,
+  "C0": 0.6666666865348816,
+  "saddle_gradient_max": 1.5151595604785607e-15,
+  "saddle_negative_modes": [
+    1
+  ],
+  "endpoint_negative_modes": [
+    0
+  ],
+  "maximum_path_excess_over_saddle": 8.881784197001252e-16,
+  "chiral_planar_ansatz_energy_crossing": 0.17323185248036022,
+  "zero_soc_planar": {
+    "energy": -1.2778753100104479,
+    "density": 1.277875310010448,
+    "dipole_per_density": -1.6666666865348816,
+    "chirality": 0.0,
+    "spin_alignment": -0.5,
+    "chiral_residual": 0.7500000000000001,
+    "A_plus_fraction": 0.49999999999999983,
+    "P_abs": 0.0,
+    "B_plus_abs": 0.6389376550052238,
+    "B_minus_abs": 0.6389376550052238,
+    "gradient_norm": 6.280369834735101e-16,
+    "negative_modes": 0,
+    "zero_modes": 4,
+    "smallest_eigenvalue": -2.220446049250313e-16,
+    "smallest_positive_eigenvalue": 3.6500054497705947
+  }
+}

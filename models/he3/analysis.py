@@ -37,6 +37,11 @@ class He3Analysis:
         )
         if "spin_alignment" in m:
             values += (m["spin_alignment"],)
+        if "kxy" in m:
+            hxy = (m['kxy']-(m['ixiy']-m['ix']*m['iy'])/self.temperatures)/L**2
+            det = hx*hy-hxy**2
+            effective = np.sqrt(np.where((hx > 0) & (hy > 0) & (det > 0), det, np.nan))
+            values += (hxy, det, effective)
         return np.stack(values)
 
 
@@ -111,6 +116,9 @@ class He3Analysis:
                 # The saved Qzz is already normalized for each configuration.
                 moments["spin_alignment"] = s["spin_alignment"]
                 names += ("spin_alignment",)
+            if 'curvature_xy' in s:
+                moments.update(kxy=s['curvature_xy'], ixiy=s['current_x']*s['current_y'])
+                names += ('helicity_xy', 'helicity_determinant', 'helicity_effective')
             values, errors = blocked_jackknife(
                 moments, lambda m: self._estimate(L, m), self.block_size)
             results[L] = {key: array for name, value, error in zip(names, values, errors)

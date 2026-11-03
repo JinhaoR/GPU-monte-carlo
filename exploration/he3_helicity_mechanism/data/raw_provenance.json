@@ -1,0 +1,254 @@
+[
+  {
+    "g_d": 0,
+    "L": 64,
+    "source": "data\\he3\\P=20_gd=0_gaussian\\L=64.npz",
+    "campaign": "soc_scan_02",
+    "selected_indices": [
+      23,
+      66,
+      68,
+      70,
+      71,
+      72,
+      74,
+      76,
+      98,
+      146
+    ],
+    "source_bytes": 703225358,
+    "crc32": "L64_energy.npy:4645a01d;L64_density.npy:0dc38db6;L64_chirality.npy:56aaa7c5;L64_phase_real.npy:de212552;L64_phase_imag.npy:c6682f34;L64_current_x.npy:85c2aa88;L64_curvature_x.npy:778311d2;L64_current_y.npy:b4f03ef5;L64_curvature_y.npy:17393fb2;L64_spin_alignment.npy:33adf18d;manifest.npy:15d3684d",
+    "block_records": 2000
+  },
+  {
+    "g_d": 0,
+    "L": 96,
+    "source": "data\\he3\\P=20_gd=0_gaussian\\L=96.npz",
+    "campaign": "soc_scan_02",
+    "selected_indices": [
+      23,
+      66,
+      68,
+      70,
+      71,
+      72,
+      74,
+      76,
+      98,
+      146
+    ],
+    "source_bytes": 710658430,
+    "crc32": "L96_energy.npy:deccff58;L96_density.npy:6e5a140a;L96_chirality.npy:71582672;L96_phase_real.npy:4218c585;L96_phase_imag.npy:5d782db5;L96_current_x.npy:91d0b903;L96_curvature_x.npy:377cdf73;L96_current_y.npy:54fd7117;L96_curvature_y.npy:8d0c11f0;L96_spin_alignment.npy:d988f2de;manifest.npy:3df1d671",
+    "block_records": 2000
+  },
+  {
+    "g_d": 0,
+    "L": 128,
+    "source": "data\\he3\\P=20_gd=0_gaussian\\L=128.npz",
+    "campaign": "soc_scan_02",
+    "selected_indices": [
+      23,
+      66,
+      68,
+      70,
+      71,
+      72,
+      74,
+      76,
+      98,
+      146
+    ],
+    "source_bytes": 715748328,
+    "crc32": "L128_energy.npy:6af909bb;L128_density.npy:2469833a;L128_chirality.npy:e9d22157;L128_phase_real.npy:93d48957;L128_phase_imag.npy:8bdef20c;L128_current_x.npy:3a2bb86c;L128_curvature_x.npy:64d5e60e;L128_current_y.npy:2d1cbfff;L128_curvature_y.npy:91f09df1;L128_spin_alignment.npy:4a29598d;manifest.npy:73fc5707",
+    "block_records": 2000
+  },
+  {
+    "g_d": 0,
+    "L": 160,
+    "source": "data\\he3\\P=20_gd=0_gaussian\\L=160.npz",
+    "campaign": "soc_scan_02",
+    "selected_indices": [
+      23,
+      66,
+      68,
+      70,
+      71,
+      72,
+      74,
+      76,
+      98,
+      146
+    ],
+    "source_bytes": 718997529,
+    "crc32": "L160_energy.npy:5a6f3686;L160_density.npy:9079c5b5;L160_chirality.npy:c70d24a4;L160_phase_real.npy:9142fa7d;L160_phase_imag.npy:ea7dfa7f;L160_current_x.npy:b23579d4;L160_curvature_x.npy:6e9fb901;L160_current_y.npy:0f9e78b4;L160_curvature_y.npy:adf28c28;L160_spin_alignment.npy:da871418;manifest.npy:88dfe9f6",
+    "block_records": 2000
+  },
+  {
+    "g_d": 0.001,
+    "L": 64,
+    "source": "data\\he3\\P=20_gd=0.001_gaussian\\L=64.npz",
+    "campaign": "soc_scan_02",
+    "selected_indices": [
+      23,
+      66,
+      68,
+      70,
+      71,
+      72,
+      74,
+      76,
+      98,
+      146
+    ],
+    "source_bytes": 703319714,
+    "crc32": "L64_energy.npy:5a59e385;L64_density.npy:c09a2cf8;L64_chirality.npy:a400eb4a;L64_phase_real.npy:9272a5e0;L64_phase_imag.npy:8c2b1e9f;L64_current_x.npy:f92f803f;L64_curvature_x.npy:7d8c6536;L64_current_y.npy:46be0c4a;L64_curvature_y.npy:8cb6c962;L64_spin_alignment.npy:ece1752e;manifest.npy:cbf8ff18",
+    "block_records": 2000
+  },
+  {
+    "g_d": 0.001,
+    "L": 96,
+    "source": "data\\he3\\P=20_gd=0.001_gaussian\\L=96.npz",
+    "campaign": "soc_scan_02",
+    "selected_indices": [
+      23,
+      66,
+      68,
+      70,
+      71,
+      72,
+      74,
+      76,
+      98,
+      146
+    ],
+    "source_bytes": 710650764,
+    "crc32": "L96_energy.npy:89ae2350;L96_density.npy:8ab9ed58;L96_chirality.npy:f5346728;L96_phase_real.npy:ecd29b36;L96_phase_imag.npy:d95578bf;L96_current_x.npy:09bbd3c1;L96_curvature_x.npy:cab35f1a;L96_current_y.npy:4b08efc4;L96_curvature_y.npy:797f02ff;L96_spin_alignment.npy:b8497613;manifest.npy:8bf7f5a9",
+    "block_records": 2000
+  },
+  {
+    "g_d": 0.001,
+    "L": 128,
+    "source": "data\\he3\\P=20_gd=0.001_gaussian\\L=128.npz",
+    "campaign": "soc_scan_02",
+    "selected_indices": [
+      23,
+      66,
+      68,
+      70,
+      71,
+      72,
+      74,
+      76,
+      98,
+      146
+    ],
+    "source_bytes": 715552493,
+    "crc32": "L128_energy.npy:a554c725;L128_density.npy:5828fd7e;L128_chirality.npy:c824a6b1;L128_phase_real.npy:380770b6;L128_phase_imag.npy:92bba807;L128_current_x.npy:f2a468d5;L128_curvature_x.npy:91984727;L128_current_y.npy:f5442632;L128_curvature_y.npy:d2b76ca6;L128_spin_alignment.npy:7939a9eb;manifest.npy:b25cf85e",
+    "block_records": 2000
+  },
+  {
+    "g_d": 0.001,
+    "L": 160,
+    "source": "data\\he3\\P=20_gd=0.001_gaussian\\L=160.npz",
+    "campaign": "soc_scan_02",
+    "selected_indices": [
+      23,
+      66,
+      68,
+      70,
+      71,
+      72,
+      74,
+      76,
+      98,
+      146
+    ],
+    "source_bytes": 718691206,
+    "crc32": "L160_energy.npy:7b0e4d90;L160_density.npy:c04b6f61;L160_chirality.npy:ec7e2b94;L160_phase_real.npy:7f3fcd2c;L160_phase_imag.npy:aa5aee20;L160_current_x.npy:9f566053;L160_curvature_x.npy:978a655b;L160_current_y.npy:12acd7c1;L160_curvature_y.npy:a51bf355;L160_spin_alignment.npy:55f0178e;manifest.npy:3b8e237f",
+    "block_records": 2000
+  },
+  {
+    "g_d": 0.01,
+    "L": 64,
+    "source": "data\\he3\\P=20_gd=0.01_gaussian\\L=64.npz",
+    "campaign": "soc_scan_02",
+    "selected_indices": [
+      23,
+      71,
+      73,
+      75,
+      76,
+      77,
+      79,
+      81,
+      98,
+      146
+    ],
+    "source_bytes": 703571630,
+    "crc32": "L64_energy.npy:859e1bc3;L64_density.npy:f962d7c8;L64_chirality.npy:22797e8d;L64_phase_real.npy:1e5b66d1;L64_phase_imag.npy:0fd5ec76;L64_current_x.npy:3785823d;L64_curvature_x.npy:518ae9a5;L64_current_y.npy:3f5ceb16;L64_curvature_y.npy:d7e742d6;L64_spin_alignment.npy:a2fdeafd;manifest.npy:25ba2464",
+    "block_records": 2000
+  },
+  {
+    "g_d": 0.01,
+    "L": 96,
+    "source": "data\\he3\\P=20_gd=0.01_gaussian\\L=96.npz",
+    "campaign": "soc_scan_02",
+    "selected_indices": [
+      23,
+      71,
+      73,
+      75,
+      76,
+      77,
+      79,
+      81,
+      98,
+      146
+    ],
+    "source_bytes": 710938064,
+    "crc32": "L96_energy.npy:3ce8e6ad;L96_density.npy:b91e8053;L96_chirality.npy:1e12279a;L96_phase_real.npy:955175b2;L96_phase_imag.npy:2a699e65;L96_current_x.npy:1a775145;L96_curvature_x.npy:69fe8331;L96_current_y.npy:c338c1dc;L96_curvature_y.npy:97b9e253;L96_spin_alignment.npy:93d9c289;manifest.npy:7ae472b0",
+    "block_records": 2000
+  },
+  {
+    "g_d": 0.01,
+    "L": 128,
+    "source": "data\\he3\\P=20_gd=0.01_gaussian\\L=128.npz",
+    "campaign": "soc_scan_02",
+    "selected_indices": [
+      23,
+      71,
+      73,
+      75,
+      76,
+      77,
+      79,
+      81,
+      98,
+      146
+    ],
+    "source_bytes": 715745714,
+    "crc32": "L128_energy.npy:c5b1cae2;L128_density.npy:dcc0f9b6;L128_chirality.npy:b1f04769;L128_phase_real.npy:41824675;L128_phase_imag.npy:c9d5a433;L128_current_x.npy:bb9af567;L128_curvature_x.npy:00b2afd3;L128_current_y.npy:28e69e39;L128_curvature_y.npy:d1fe11ac;L128_spin_alignment.npy:22d0cb6e;manifest.npy:7e52a114",
+    "block_records": 2000
+  },
+  {
+    "g_d": 0.01,
+    "L": 160,
+    "source": "data\\he3\\P=20_gd=0.01_gaussian\\L=160.npz",
+    "campaign": "soc_scan_02",
+    "selected_indices": [
+      23,
+      71,
+      73,
+      75,
+      76,
+      77,
+      79,
+      81,
+      98,
+      146
+    ],
+    "source_bytes": 718789645,
+    "crc32": "L160_energy.npy:2f87167b;L160_density.npy:68b5cebd;L160_chirality.npy:a9b8b2b5;L160_phase_real.npy:083a82a1;L160_phase_imag.npy:ec1cd70c;L160_current_x.npy:5eb9bae0;L160_curvature_x.npy:0ef1c638;L160_current_y.npy:18bf09d7;L160_curvature_y.npy:aa09231b;L160_spin_alignment.npy:7cbaa5c9;manifest.npy:9a2a3ff6",
+    "block_records": 2000
+  }
+]

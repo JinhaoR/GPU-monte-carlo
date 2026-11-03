@@ -55,6 +55,7 @@ class He3Model(Model):
         self.realspace_every = 0
         self.realspace_indices = []
         self.realspace_samples = []
+        self.charged_profiles = False
         self._measurement_count = 0
         self._spatial_meter = None
 
@@ -115,16 +116,15 @@ class He3Model(Model):
                     (self._measurement_count - 1, amplitudes, structure, walkers)
                 )
             if self.realspace_every and self._measurement_count % self.realspace_every == 0:
-                from .spatial import compact_correlations
+                from .spatial import measurement_profiles
                 walkers = (np.arange(R, dtype=np.int32) if temperature_indices is None
                            else np.argsort(temperature_indices.copy_to_host()).astype(np.int32))
                 indices = np.asarray(self.realspace_indices, dtype=np.int32)
                 profiles, means = [], []
                 for walker in walkers[indices]:
-                    c = compact_correlations(state[int(walker)].copy_to_host())
-                    stop = state.shape[1] // 2 + 1
-                    profiles.append(np.stack((c['x'][:7, :stop], c['y'][:7, :stop]), axis=1))
-                    means.append(c['means'][:7])
+                    c, mean = measurement_profiles(state[int(walker)].copy_to_host(), self.charged_profiles)
+                    profiles.append(c)
+                    means.append(mean)
                 self.realspace_samples.append((self._measurement_count - 1,
                     np.stack(profiles), np.stack(means), walkers[indices], indices.copy()))
         return result
@@ -148,3 +148,48 @@ class He3Model(Model):
                     float(np.sqrt(2.0 * self.K / self.g_d))
                     if self.g_d > 0 else None
                 )}
+
+    def measurement_settings(self):
+        return dict(spatial_every=self.spatial_every, realspace_every=self.realspace_every,
+                    realspace_indices=self.realspace_indices, charged_profiles=self.charged_profiles)
+
+    def measurement_state(self):
+        return dict(settings=self.measurement_settings(), count=self._measurement_count,
+                    spatial=[np.stack(column) for column in zip(*self.spatial_samples)],
+                    realspace=[np.stack(column) for column in zip(*self.realspace_samples)])
+
+    def validate_measurement_state(self, saved, samples, scalar_count, R, L):
+        from utils.checkpoint import same_settings
+        if not same_settings(saved['settings'], self.measurement_settings()):
+            raise ValueError('Measurement cadence/fields mismatch')
+        expected = scalar_count if self.spatial_every or self.realspace_every else 0
+        if saved['count'] != expected:
+            raise ValueError('Measurement counter mismatch')
+        if scalar_count and (set(samples) != set(MEASUREMENT_NAMES)
+                or any(v.dtype != np.float64 or v.shape != (scalar_count, R) for v in samples.values())):
+            raise ValueError('He3 scalar measurement channels/dtypes mismatch')
+        for key, cadence, columns in [('spatial', self.spatial_every, 4), ('realspace', self.realspace_every, 5)]:
+            data = saved[key]
+            events = expected//cadence if cadence else 0
+            if (events == 0 and data) or (events and (len(data) != columns or any(len(c) != events for c in data))):
+                raise ValueError('Measurement record length mismatch')
+            if events and not np.array_equal(data[0], np.arange(cadence-1, expected, cadence)):
+                raise ValueError('Measurement sample indices mismatch')
+            if events:
+                if key == 'spatial':
+                    shapes = [(events,), (events,R,16,5), (events,R,68), (events,R)]
+                    types = [np.int64, np.complex128, np.float64, np.int32]
+                else:
+                    probes, fields = len(self.realspace_indices), 11 if self.charged_profiles else 7
+                    shapes = [(events,), (events,probes,fields,2,L//2+1),
+                              (events,probes,fields), (events,probes), (events,probes)]
+                    types = [np.int64, np.complex128, np.complex128, np.int32, np.int32]
+                for array, shape, dtype in zip(data, shapes, types):
+                    if array.shape != shape or array.dtype != dtype:
+                        raise ValueError('Measurement shape/dtype mismatch')
+
+    def load_measurement_state(self, saved):
+        self._measurement_count = saved['count']
+        self.spatial_samples = list(zip(*saved['spatial']))
+        self.realspace_samples = list(zip(*saved['realspace']))
+        self._spatial_meter = None  # scratch space, no physical or RNG state

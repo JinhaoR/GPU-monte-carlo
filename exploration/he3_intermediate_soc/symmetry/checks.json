@@ -1,0 +1,19 @@
+{
+  "source_sha256": "233c4386810b21d1342833433b56576b8aba7062a0c45fe3f735b8d786fba242",
+  "finite_twist_max_error_per_site": 3.555894023676842e-09,
+  "full_source_energy_max_error": 1.1368683772161603e-13,
+  "mirror_spectral_counterexample": {
+    "kx": 0.7,
+    "ky": 1.1,
+    "original_eigenvalues": [
+      1.5892981630253105,
+      4.663195367294164
+    ],
+    "mirrored_eigenvalues": [
+      2.0391046720403976,
+      4.213388858279076
+    ],
+    "cross_sum": 0.5139645637793326,
+    "expected_cross_sum": 0.5139645637793328
+  }
+}

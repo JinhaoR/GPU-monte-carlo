@@ -133,3 +133,37 @@ class Runtime:
 
     def snapshot(self):
         return self.state.copy_to_host()
+
+    def checkpoint_settings(self):
+        return dict(runtime=type(self).__name__, L=self.L, temperatures=self.temperatures,
+                    seed=self.seed, threads=self.threads_per_block,
+                    model=type(self.model).__name__, parameters=self.model.parameters())
+
+    def state_dict(self):
+        cuda.synchronize()
+        return dict(settings=self.checkpoint_settings(), state=self.state.copy_to_host(),
+                    rng_states=self.rng_states.copy_to_host(), betas=self.betas.copy_to_host(),
+                    configuration_version=self._configuration_version, energy_version=self._energy_version,
+                    cached_energies=(None if self._cached_energies is None
+                                     else self._cached_energies.copy_to_host()))
+
+    def validate_state(self, saved):
+        from utils.checkpoint import check_array, same_settings
+        if not same_settings(saved['settings'], self.checkpoint_settings()):
+            raise ValueError('Runtime checkpoint settings mismatch')
+        for name in ('state', 'rng_states', 'betas'):
+            check_array(saved[name], getattr(self, name), name)
+        cv, ev, energy = saved['configuration_version'], saved['energy_version'], saved['cached_energies']
+        if cv < 0 or ev not in (-1, cv) or (energy is None) != (ev == -1):
+            raise ValueError('Invalid energy cache state')
+        if energy is not None:
+            check_array(energy, np.empty(self.R, dtype=np.float64), 'cached_energies')
+
+    def load_state_dict(self, saved):
+        self.validate_state(saved)
+        for name in ('state', 'rng_states', 'betas'):
+            getattr(self, name).copy_to_device(saved[name])
+        self._configuration_version = saved['configuration_version']
+        self._energy_version = saved['energy_version']
+        self._cached_energies = (None if saved['cached_energies'] is None
+                                else cuda.to_device(saved['cached_energies']))

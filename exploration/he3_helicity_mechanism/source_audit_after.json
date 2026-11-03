@@ -1,0 +1,28 @@
+{
+  "head": "8376ae0fa6c8feb7e0b8aa71446cff1eb43a2d46",
+  "branch": "exploration/he3-soc-analysis",
+  "head_unchanged": true,
+  "branch_unchanged": true,
+  "original_python_files_checked": 107,
+  "source_hash_mismatches": [],
+  "original_data_files_checked": 19,
+  "data_size_or_mtime_mismatches": [],
+  "added_git_status_entries": [
+    "?? exploration/he3_helicity_mechanism/"
+  ],
+  "removed_git_status_entries": [],
+  "exploratory_scripts_parsed": [
+    "exploration\\he3_helicity_mechanism\\correlation_checks.py",
+    "exploration\\he3_helicity_mechanism\\data\\conditional_associations.py",
+    "exploration\\he3_helicity_mechanism\\data\\current_histories.py",
+    "exploration\\he3_helicity_mechanism\\data\\decompose.py",
+    "exploration\\he3_helicity_mechanism\\data\\summarize_evidence.py",
+    "exploration\\he3_helicity_mechanism\\review\\audit_scaling.py",
+    "exploration\\he3_helicity_mechanism\\review\\reference_audit.py",
+    "exploration\\he3_helicity_mechanism\\theory\\harmonic_checks.py"
+  ],
+  "missing_local_markdown_links": [],
+  "production_simulations_run": 0,
+  "cluster_jobs_submitted": 0,
+  "git_commits_created": 0
+}

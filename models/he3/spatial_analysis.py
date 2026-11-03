@@ -109,15 +109,44 @@ def summarize_realspace(run, block_size=10):
             c = m['profiles']
             if connected:
                 c = c - abs(m['means'])[..., None, None]**2
-            sectors = np.stack((c[:, 0], c[:, 1], c[:, 2:7].sum(axis=1)), axis=1)
+            sectors = np.concatenate((np.stack((c[:, 0], c[:, 1], c[:, 2:7].sum(axis=1)), axis=1), c[:, 7:]), axis=1)
             return np.stack((sectors.real, sectors.imag), axis=-1)
         value, error = jackknife_from_blocks(blocks, estimate)
         out[label] = value[..., 0] + 1j*value[..., 1]
         out[label+'_se_real'], out[label+'_se_imag'] = error[..., 0], error[..., 1]
     out.update(temperatures=np.asarray(meta['realspace_temperatures']),
                displacements=np.asarray(meta['realspace_displacements']),
-               sectors=np.array(['kappa', 'P', 'Q']), directions=np.array(['x', 'y']),
+               sectors=np.array(['kappa', 'P', 'Q']+list(meta['realspace_fields'][7:])), directions=np.array(['x', 'y']),
                mean_fields=blocks['means'].mean(0), blocks=np.array(len(blocks['means'])),
                block_size_profile_events=np.array(block_size),
                dropped_events=np.array(len(profiles) % block_size))
     return out
+
+
+def summarize_charged(run, block_size=100):
+    """Charge-one orbital/spin channels and charge-two tensor from existing modes.
+
+    No duplicated simulation storage. S(k)=<|sum_x f(x)e^-ikx|^2>/L^2.
+    Full (not snapshot-demeaned) correlations diagnose charged coherence.
+    """
+    from .spatial import charged_amplitudes
+    a = charged_amplitudes(run['samples']['spatial_amplitudes'])
+    channels = {}
+    for name, values in a.items():
+        channels[name] = np.sum(abs(values)**2, axis=-2)
+        if name.startswith('A_'):
+            for i, spin in enumerate('xyz'):
+                channels[name+'_'+spin] = abs(values[..., i, :])**2
+    L = run['metadata']['L']
+    names = list(channels)
+    blocks = {'power': block_means(np.stack(list(channels.values()), axis=-2)/L**2, block_size)}
+    if len(blocks['power']) < 2:
+        raise ValueError('At least two complete spatial blocks required')
+    def estimate(m):
+        power = m['power']
+        ratio, xi, _ = correlation_ratio(power[..., 0], power[..., 1:].mean(-1), L)
+        return np.concatenate((power, ratio[..., None], xi[..., None]), axis=-1)
+    values, errors = jackknife_from_blocks(blocks, estimate)
+    return dict(channels=names, spectra=values[..., :5], spectra_se=errors[..., :5],
+                ratio=values[..., 5], ratio_se=errors[..., 5], xi_over_L=values[..., 6], xi_over_L_se=errors[..., 6],
+                blocks=len(blocks['power']), dropped_events=len(run['samples']['spatial_amplitudes']) % block_size)

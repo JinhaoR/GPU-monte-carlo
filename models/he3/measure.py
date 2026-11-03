@@ -15,7 +15,7 @@ MEASURE_THREADS = 256
 MEASUREMENT_NAMES = (
     "energy", "density", "chirality", "phase_real", "phase_imag",
     "current_x", "curvature_x", "current_y", "curvature_y",
-    "spin_alignment",
+    "spin_alignment", "curvature_xy",
 )
 
 
@@ -23,11 +23,12 @@ MEASUREMENT_NAMES = (
 def _measure(state, output, betas, K, temperature_indices, cached_energies, g_d):
     r, tid = cuda.blockIdx.x, cuda.threadIdx.x
     L = state.shape[1]
-    shared = cuda.shared.array((10, MEASURE_THREADS), dtype=float64)
+    shared = cuda.shared.array((11, MEASURE_THREADS), dtype=float64)
     psi = cuda.local.array((3, 2), dtype=complex64)
     energy, density, chirality, pr, pi = 0.0, 0.0, 0.0, 0.0, 0.0
     ix, kx, iy, ky = 0.0, 0.0, 0.0, 0.0
     spin_z_density = 0.0
+    kxy = 0.0
     for site in range(tid, L * L, cuda.blockDim.x):
         i, j = site // L, site % L
         for mu in range(3):
@@ -58,17 +59,20 @@ def _measure(state, output, betas, K, temperature_indices, cached_energies, g_d)
             kx += 2 * K * (3 * norm2(xp_x) + norm2(xp_y) - zx.real)
             iy += 2 * K * zy.imag
             ky += 2 * K * (norm2(yp_x) + 3 * norm2(yp_y) - zy.real)
+            # Mixed derivative of the SAME forward-neighbor twist convention.
+            kxy += 2 * K * (xp_x.conjugate() * yp_y + xp_y.conjugate() * yp_x).real
 
     shared[0, tid], shared[1, tid], shared[2, tid] = energy, density, chirality
     shared[3, tid], shared[4, tid] = pr, pi
     shared[5, tid], shared[6, tid] = ix, kx
     shared[7, tid], shared[8, tid] = iy, ky
     shared[9, tid] = spin_z_density
+    shared[10, tid] = kxy
     cuda.syncthreads()
     stride = cuda.blockDim.x // 2
     while stride > 0:
         if tid < stride:
-            for channel in range(10):
+            for channel in range(11):
                 shared[channel, tid] += shared[channel, tid + stride]
         cuda.syncthreads()
         stride //= 2
@@ -87,6 +91,7 @@ def _measure(state, output, betas, K, temperature_indices, cached_energies, g_d)
             output[9, destination] = 0.0
         else:
             output[9, destination] = 0.5 * (3 * shared[9, 0] / shared[1, 0] - 1)
+        output[10, destination] = shared[10, 0]
 
 
 @cuda.jit

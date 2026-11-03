@@ -1,0 +1,26 @@
+{
+  "description": "Deterministic quadratic-branch calculation; no thermal sampling",
+  "source_sha256": "7d3a937e3a739120a25104a22fc361cda76a695f8aed0140cc19b8acbe4e99bd",
+  "betas": [
+    -0.5165123343467712,
+    0.9420228004455566,
+    0.9875290393829346,
+    0.8790628910064697,
+    -1.152514934539795
+  ],
+  "K": 1.0,
+  "errors": {
+    "onsite_source": 9.094947017729282e-13,
+    "gradient_source": 7.105427357601002e-15,
+    "chiral_gradient": 8.881784197001252e-15,
+    "hessian_finite_difference": 7.142434597466145e-09,
+    "hessian_halfstep": 4.014122367834716e-06,
+    "uniform_trace": 2.842170943040401e-14,
+    "phase_schur": 2.220446049250313e-16,
+    "lattice_curvature_identity": 4.050093593832571e-13,
+    "finite_twist_derivatives": 4.213006832287647e-09
+  },
+  "zero_soc_density": 1.4957279983624499,
+  "elapsed_seconds": 0.6187366000001475,
+  "covariance_scope": "Expansion about bare homogeneous n0, no self-consistent thermal mass or density; no defects; q=0 Goldstone modes removed"
+}

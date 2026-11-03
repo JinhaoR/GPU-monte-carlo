@@ -26,10 +26,14 @@ _ROUND_TRIP_SWEEPS = 4
 
 
 @cuda.jit
-def _record_walkers_kernel(walker_to_temperature, walker_ids, history, row):
+def _record_walkers_kernel(walker_to_temperature, walker_ids, history, row, trips, endpoint_history):
     column = cuda.grid(1)
     if column < walker_ids.size:
-        history[row, column] = walker_to_temperature[walker_ids[column]]
+        walker = walker_ids[column]
+        history[row, column] = walker_to_temperature[walker]
+        origin = trips[_ORIGIN, walker]
+        endpoint_history[row, column] = (-1 if origin < 0 else
+            (int(origin != 0) + trips[_VISITED_OTHER, walker]) % 2)
 
 
 @cuda.jit
@@ -195,6 +199,7 @@ class ParallelTempering:
         self._history_stride = history_stride
         self._history_chunk_rows = 1024
         self._history_chunks = []
+        self._endpoint_history_chunks = []
         self._history_sweeps = []
         self._history_rounds = []
         self._tracked_walkers_gpu = (
@@ -209,22 +214,27 @@ class ParallelTempering:
             self._history_chunks.append(cuda.device_array(
                 (self._history_chunk_rows, len(self._tracked_walkers)), dtype=np.int32,
             ))
+            self._endpoint_history_chunks.append(cuda.device_array(
+                (self._history_chunk_rows, len(self._tracked_walkers)), dtype=np.int8,
+            ))
         blocks = (len(self._tracked_walkers) + 127) // 128
         _record_walkers_kernel[blocks, 128](
             self.walker_to_temperature, self._tracked_walkers_gpu,
-            self._history_chunks[-1], row,
+            self._history_chunks[-1], row, self._trips, self._endpoint_history_chunks[-1],
         )
         self._history_sweeps.append(self.sweeps)
         self._history_rounds.append(self.exchange_rounds)
 
     def _walker_history(self, final_walker_to_temperature):
         count = len(self._history_sweeps)
-        rows = []
-        for chunk in self._history_chunks:
+        rows, endpoint_rows = [], []
+        for chunk, labels in zip(self._history_chunks, self._endpoint_history_chunks):
             used = min(self._history_chunk_rows, count)
             rows.append(chunk[:used].copy_to_host())
+            endpoint_rows.append(labels[:used].copy_to_host())
             count -= used
         positions = np.concatenate(rows, axis=0)
+        endpoints = np.concatenate(endpoint_rows, axis=0)
         sweeps = np.asarray(self._history_sweeps, dtype=np.int64)
         rounds = np.asarray(self._history_rounds, dtype=np.int64)
         if rounds[-1] != self.exchange_rounds or sweeps[-1] != self.sweeps:
@@ -233,11 +243,16 @@ class ParallelTempering:
                 final_walker_to_temperature[self._tracked_walkers][None, :]), axis=0)
             sweeps = np.append(sweeps, self.sweeps)
             rounds = np.append(rounds, self.exchange_rounds)
+            trips = self._trips.copy_to_host()[:, self._tracked_walkers]
+            last_endpoint = np.where(trips[_ORIGIN] < 0, -1,
+                                     ((trips[_ORIGIN] != 0) + trips[_VISITED_OTHER]) % 2).astype(np.int8)
+            endpoints = np.concatenate((endpoints, last_endpoint[None]), axis=0)
         return {
             "walker_ids": self._tracked_walkers.copy(),
             "sweeps": sweeps,
             "exchange_rounds": rounds,
             "temperature_indices": positions,
+            "last_endpoint": endpoints,  # -1 unknown, 0 cold, 1 hot, from exact bookkeeping
             "stride": self._history_stride,
             "stride_units": "exchange_rounds",
         }
@@ -310,8 +325,98 @@ class ParallelTempering:
             "temperature_to_walker": t_to_w,
             "walker_round_trips": trips[_ROUND_TRIPS].copy(),
             "walker_round_trip_total_sweeps": trips[_ROUND_TRIP_SWEEPS].copy(),
+            "walker_endpoint_passages": 2 * trips[_ROUND_TRIPS] + trips[_VISITED_OTHER],
+            "unfinished_trips": trips.copy(),
             "mean_round_trip_sweeps": mean_trip,
         }
         if self._tracked_walkers is not None:
             result["walker_history"] = self._walker_history(w_to_t)
         return result
+
+    def traffic_counts(self):
+        """Exact small cumulative arrays for differences at analysis boundaries."""
+        return dict(sweep=self.sweeps, trips=self._trips.copy_to_host(),
+                    swaps=self._swap_counts.copy_to_host())
+
+    def checkpoint_settings(self):
+        return dict(exchange_interval=self.exchange_interval, exchange_seed=self.exchange_seed,
+                    tracked_walkers=self._tracked_walkers, history_stride=self._history_stride)
+
+    def state_dict(self):
+        result = dict(settings=self.checkpoint_settings(), runtime=self.runtime.state_dict(),
+                      sweeps=self.sweeps, exchange_rounds=self.exchange_rounds, parity=self._parity,
+                      history_chunk_rows=self._history_chunk_rows,
+                      history_sweeps=np.asarray(self._history_sweeps, dtype=np.int64),
+                      history_rounds=np.asarray(self._history_rounds, dtype=np.int64))
+        for name in ('energies', 'walker_to_temperature', 'temperature_to_walker', '_rng_states', '_swap_counts', '_trips'):
+            result[name] = getattr(self, name).copy_to_host()
+        count = len(self._history_sweeps)
+        history = self._walker_history(result['walker_to_temperature']) if self._tracked_walkers is not None else None
+        result['history'] = history['temperature_indices'][:count] if history is not None else None
+        result['endpoint_history'] = history['last_endpoint'][:count] if history is not None else None
+        return result
+
+    def validate_state(self, saved):
+        from utils.checkpoint import check_array, same_settings
+        if not same_settings(saved['settings'], self.checkpoint_settings()):
+            raise ValueError('PT checkpoint settings mismatch')
+        self.runtime.validate_state(saved['runtime'])
+        cached = saved['runtime']['cached_energies']
+        if cached is not None and not np.array_equal(cached, saved['energies']):
+            raise ValueError('PT energy buffer differs from valid runtime cache')
+        for name in ('energies', 'walker_to_temperature', 'temperature_to_walker', '_rng_states', '_swap_counts', '_trips'):
+            check_array(saved[name], getattr(self, name), name)
+        w, t = saved['walker_to_temperature'], saved['temperature_to_walker']
+        if (not np.array_equal(np.sort(w), np.arange(self.R))
+                or not np.array_equal(np.sort(t), np.arange(self.R))
+                or not np.array_equal(t[w], np.arange(self.R))
+                or not np.array_equal(saved['runtime']['betas'], self._temperature_betas[w])):
+            raise ValueError('Invalid PT inverse maps/beta assignment')
+        if (saved['sweeps'] < 0 or saved['exchange_rounds'] < 0
+                or saved['parity'] != (saved['exchange_rounds'] % 2 if self.R > 2 else 0)):
+            raise ValueError('Invalid PT counters/parity')
+        trips, counts = saved['_trips'], saved['_swap_counts']
+        if (np.any(counts < 0) or np.any(counts[1] > counts[0])
+                or not np.isin(trips[0], [-1, 0, self.R-1]).all()
+                or not np.isin(trips[1], [0, 1]).all() or np.any(trips[3:] < 0)
+                or np.any(trips[2] > saved['sweeps']) or np.any(trips[2] < -1)):
+            raise ValueError('Invalid PT traffic bookkeeping')
+        rows = len(saved['history_sweeps'])
+        if saved['history_chunk_rows'] < 1 or len(saved['history_rounds']) != rows:
+            raise ValueError('Invalid PT history coordinates')
+        if self._tracked_walkers is not None:
+            check_array(saved['history'], np.empty((rows, len(self._tracked_walkers)), np.int32), 'history')
+            check_array(saved['endpoint_history'], np.empty((rows, len(self._tracked_walkers)), np.int8), 'endpoint_history')
+            if not np.isin(saved['endpoint_history'], [-1,0,1]).all():
+                raise ValueError('Invalid endpoint labels')
+            if (rows < 1 or np.any(saved['history'] < 0) or np.any(saved['history'] >= self.R)
+                    or np.any(np.diff(saved['history_rounds']) <= 0)
+                    or np.any(np.diff(saved['history_sweeps']) < 0)
+                    or np.any(saved['history_rounds'] % self._history_stride)
+                    or saved['history_rounds'][-1] > saved['exchange_rounds']
+                    or saved['history_sweeps'][-1] > saved['sweeps']):
+                raise ValueError('Invalid PT history')
+
+    def load_state_dict(self, saved):
+        self.validate_state(saved)
+        self.runtime.load_state_dict(saved['runtime'])
+        for name in ('energies', 'walker_to_temperature', 'temperature_to_walker', '_rng_states', '_swap_counts', '_trips'):
+            getattr(self, name).copy_to_device(saved[name])
+        if saved['runtime']['cached_energies'] is not None:
+            self.energies.copy_to_device(saved['runtime']['cached_energies'])
+            self.runtime._cached_energies = self.energies
+        self.sweeps, self.exchange_rounds, self._parity = saved['sweeps'], saved['exchange_rounds'], saved['parity']
+        self._history_chunk_rows = saved['history_chunk_rows']
+        self._history_sweeps = saved['history_sweeps'].tolist()
+        self._history_rounds = saved['history_rounds'].tolist()
+        self._history_chunks = []
+        self._endpoint_history_chunks = []
+        if self._tracked_walkers is not None:
+            for start in range(0, len(self._history_sweeps), self._history_chunk_rows):
+                rows = saved['history'][start:start+self._history_chunk_rows]
+                chunk = cuda.device_array((self._history_chunk_rows, len(self._tracked_walkers)), dtype=np.int32)
+                chunk[:len(rows)].copy_to_device(rows)
+                self._history_chunks.append(chunk)
+                labels = cuda.device_array((self._history_chunk_rows, len(self._tracked_walkers)), dtype=np.int8)
+                labels[:len(rows)].copy_to_device(saved['endpoint_history'][start:start+len(rows)])
+                self._endpoint_history_chunks.append(labels)

@@ -1,0 +1,22 @@
+{
+  "max_Y_identity_error": 6.661338147750939e-16,
+  "max_share_sum_error": 8.881784197001252e-16,
+  "max_product_difference_error": 3.885780586188048e-16,
+  "max_raw_cache_mean_error": 1.4551915228366852e-11,
+  "max_total_variance_residual": 4.440892098500626e-16,
+  "max_mean_current_correction": 0.00023107004219205171,
+  "max_mean_current_correction_over_Y_se": 0.03277936834964919,
+  "largest_conditional_mean_between_share": 0.00026042993085379314,
+  "current_kurtosis_range": [
+    -0.0379102671734044,
+    0.09055783620090407
+  ],
+  "top_one_percent_variance_share_range": [
+    0.0822334412798419,
+    0.08830529580361018
+  ],
+  "largest_one_percent_tail_block_fraction": 0.06333333333333332,
+  "curve_points": 1920,
+  "raw_directional_points": 240,
+  "conditional_partitions": 960
+}

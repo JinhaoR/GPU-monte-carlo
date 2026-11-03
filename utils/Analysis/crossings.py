@@ -5,9 +5,17 @@ import numpy as np
 def linear_crossings(T, y1, y2=0.0, *, temperature_range=None):
     T = np.asarray(T)
     d = np.broadcast_to(np.asarray(y1) - y2, T.shape)
-    if not np.all(np.isfinite(d)):
+    edges = np.ones(max(0, len(T)-1), dtype=bool)
+    points = np.ones(len(T), dtype=bool)
+    if temperature_range is not None:
+        low, high = temperature_range
+        edges = np.minimum(T[1:], high) > np.maximum(T[:-1], low)
+        points = (T >= low) & (T <= high)
+        points[:-1] |= edges
+        points[1:] |= edges
+    if not np.all(np.isfinite(d[points])):
         return [np.nan]
-    if np.any((d[:-1] == 0) & (d[1:] == 0)):
+    if np.any(edges & (d[:-1] == 0) & (d[1:] == 0)):
         return [np.nan]  # A whole interval of roots is not a unique crossing.
 
     roots = list(T[d == 0])

@@ -24,13 +24,13 @@ def _json_ready(value):
     return value
 
 
-def save_runs(path, runs):
+def save_runs(path, runs, *, binary_metadata=False):
     path = Path(path)
     path.parent.mkdir(parents=True, exist_ok=True)
 
     arrays = {}
     manifest = {
-        "version": 1,
+        "version": 2 if binary_metadata else 1,
         "runs": {},
     }
 
@@ -38,7 +38,8 @@ def save_runs(path, runs):
         samples = run["samples"]
 
         manifest["runs"][str(L)] = {
-            "metadata": _json_ready(run["metadata"]),
+            "metadata": (_binary_metadata(run["metadata"], arrays) if binary_metadata
+                         else _json_ready(run["metadata"])),
             "sample_names": list(samples),
         }
 
@@ -56,7 +57,7 @@ def load_runs(path):
     with np.load(path, allow_pickle=False) as file:
         manifest = json.loads(file["manifest"].item())
 
-        if manifest["version"] != 1:
+        if manifest["version"] not in (1, 2):
             raise ValueError("Unsupported data format version")
 
         for L_str, info in manifest["runs"].items():
@@ -69,7 +70,18 @@ def load_runs(path):
 
             runs[L] = {
                 "samples": samples,
-                "metadata": info["metadata"],
+                "metadata": (_read_binary_metadata(info["metadata"], file)
+                             if manifest['version'] == 2 else info['metadata']),
             }
 
     return runs
+
+
+def _binary_metadata(metadata, arrays):
+    from .checkpoint import pack_tree
+    return pack_tree(metadata, arrays)
+
+
+def _read_binary_metadata(metadata, archive):
+    from .checkpoint import unpack_tree
+    return unpack_tree(metadata, archive)

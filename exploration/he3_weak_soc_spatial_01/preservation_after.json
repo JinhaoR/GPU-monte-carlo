@@ -1,0 +1,23 @@
+{
+  "branch": "exploration/he3-soc-analysis",
+  "head": "8376ae0fa6c8feb7e0b8aa71446cff1eb43a2d46",
+  "original_source_hashes_checked": 115,
+  "source_mismatches": [],
+  "completed_input_sizes_and_mtimes_checked": 8,
+  "dataset_stat_changes": [],
+  "new_python_syntax_checked": [
+    "analyze.py",
+    "energy_histograms.py",
+    "figures.py",
+    "findings.py",
+    "orbital_channels.py",
+    "reduce.py",
+    "robustness.py"
+  ],
+  "missing_report_targets": [],
+  "tracked_worktree_diff": "",
+  "staged_diff": "",
+  "output_bytes": 404754746,
+  "new_simulations_launched": false,
+  "figures": 9
+}

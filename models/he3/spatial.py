@@ -31,7 +31,7 @@ STRUCTURE_NAMES = (
 HIST_NAMES = ('epsilon_count', 'epsilon_density', 'orbital_loss_count', 'spin_loss_count')
 
 
-def add_spatial_samples(run, records, realspace_records=()):
+def add_spatial_samples(run, records, realspace_records=(), *, charged_profiles=False, clear=True):
     """Attach occasional measurements to the existing NPZ format, with their own axis.
 
     Record indices refer to scalar measurement calls in this single Simulation.
@@ -50,7 +50,8 @@ def add_spatial_samples(run, records, realspace_records=()):
                     spatial_fields=FIELDS, spatial_momenta=MOMENTA, structure_names=STRUCTURE_NAMES,
                     structure_histograms=HIST_NAMES, structure_histogram_edges=HIST_EDGES,
                     structure_density_floor=DENSITY_FLOOR)
-        records.clear()
+        if clear:
+            records.clear()
     if realspace_records:
         indices, profiles, means, walkers, temperatures = zip(*realspace_records)
         indices, temperatures = np.asarray(indices), np.asarray(temperatures)
@@ -63,10 +64,47 @@ def add_spatial_samples(run, records, realspace_records=()):
         samples['realspace_energy'] = samples['energy'][indices][:, probes]
         meta.update(realspace_sample_indices=indices, realspace_sample_sweeps=meta['sample_sweeps'][indices],
                     realspace_temperature_indices=probes, realspace_temperatures=meta['temperatures'][probes],
-                    realspace_fields=FIELDS[:7], realspace_directions=('x', 'y'),
+                    realspace_fields=FIELDS[:7] + (CHARGED_PROFILES if charged_profiles else ()), realspace_directions=('x', 'y'),
                     realspace_displacements=np.arange(meta['L']//2+1),
                     realspace_normalization='G_c(r)=mean_x f_c(x+r) conj(f_c(x)); no mean subtraction')
-        realspace_records.clear()
+        if clear:
+            realspace_records.clear()
+
+
+CHARGED_PROFILES = ('A_plus_z', 'A_minus_z', 'B_plus_plus', 'B_minus_minus')
+
+
+def charged_amplitudes(amplitudes):
+    """Linear transforms of the saved 16-field amplitudes (..., field, mode).
+
+    Plus/minus mean the REAL diagonal orbitals (Ax +/- Ay)/sqrt(2),
+    not the circular/chiral basis. Apply before squaring to retain interference.
+    Each A channel has three spin components; B channels are scalar.
+    """
+    a = np.asarray(amplitudes)
+    x, y = a[..., [10, 12, 14], :], a[..., [11, 13, 15], :]
+    xx, yy, xy = (a[..., i:i+1, :] for i in (7, 8, 9))
+    return dict(A_plus=(x+y)/np.sqrt(2), A_minus=(x-y)/np.sqrt(2),
+                A_x=x, A_y=y, B_plus_plus=(xx+yy+2*xy)/2,
+                B_minus_minus=(xx+yy-2*xy)/2, B_plus_minus=(xx-yy)/2,
+                B_xx=xx, B_yy=yy, B_xy=xy)
+
+
+def measurement_profiles(state, charged=False):
+    """Only the requested axial profiles: no radial bins or unused field FFTs."""
+    f = local_fields(state)
+    fields = f[..., :7]
+    if charged:
+        c = charged_amplitudes(f[..., None])
+        extra = [c['A_plus'][..., 2, 0], c['A_minus'][..., 2, 0],
+                 c['B_plus_plus'][..., 0, 0], c['B_minus_minus'][..., 0, 0]]
+        fields = np.concatenate((fields, np.stack(extra, axis=-1)), axis=-1)
+    L = state.shape[0]
+    ft = np.fft.fftn(fields, axes=(0, 1))
+    corr = np.fft.ifftn(abs(ft)**2, axes=(0, 1))/(L*L)
+    stop = L//2+1
+    profiles = np.stack((corr[:stop, 0].T, corr[0, :stop].T), axis=1)
+    return profiles, fields.mean(axis=(0, 1))
 
 
 def local_fields(state):
